@@ -355,116 +355,72 @@ function CreditsTicker() {
   );
 }
 
-function PortfolioGrid() {
-  const [active, setActive] = useState<PortfolioCategory | "all">("all");
-  const [lightbox, setLightbox] = useState<string | null>(null);
+const INITIAL_POSTERS = 6;
 
-  const items = useMemo(
-    () => (active === "all" ? portfolio : portfolio.filter((p) => p.category === active)),
-    [active],
-  );
+function PortfolioGrid() {
+  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  const visible = expanded ? portfolio : portfolio.slice(0, INITIAL_POSTERS);
+  const hasMore = portfolio.length > INITIAL_POSTERS;
 
   return (
     <section id="portfolio" className="relative bg-void text-paper py-[14vh] px-[5vw] md:px-[3vw]">
       <div className="relative z-20">
         <div className="grid grid-cols-12 gap-6 mb-12">
           <div className="col-span-12 md:col-span-2">
-            <PhaseMark n="003" label="Portfolio" />
+            <PhaseMark n="004" label="Posters" />
           </div>
           <div className="col-span-12 md:col-span-10">
             <h2 className={`${display} font-black leading-[0.9] text-[clamp(2.5rem,8vw,8rem)] text-paper lowercase`}>
-              the <span className="text-lime italic">good</span> stuff.
+              the <span className="text-lime italic">posters</span>.
             </h2>
             <p className="mt-6 text-[14px] leading-[1.65] text-ash max-w-[52ch]">
-              Films, frames and AI fever dreams. Hover the videos for a peek — click to commit.
-              No popcorn included, sorry.
+              Print, social and campaign artwork — tap any tile to open it full size.
             </p>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 mb-10 border-t border-b border-paper/10 py-4">
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setActive(c.id)}
-              className={`px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase transition-colors ${
-                active === c.id
-                  ? "bg-lime text-paper"
-                  : "text-paper/70 hover:text-lime border border-transparent"
-              }`}
-            >
-              {c.label}
-            </button>
-          ))}
-          <span className={`ml-auto self-center ${label} text-ash`}>{items.length} pieces</span>
-        </div>
-
-        {/* Grid */}
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <AnimatePresence mode="popLayout">
-            {items.map((p, i) => (
-              <motion.article
+        <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {visible.map((p, i) => (
+              <motion.button
                 key={p.id}
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4, delay: (i % 6) * 0.04 }}
-                className="group bg-warm border border-paper/[0.06] hover:border-lime/40 transition-colors"
+                type="button"
+                onClick={() => setLightbox(p.thumbnail)}
+                className="group relative bg-warm border border-paper/[0.06] hover:border-lime/40 transition-colors overflow-hidden aspect-[3/4]"
+                aria-label={`Open ${p.title}`}
               >
-                <div className="relative aspect-[4/5] overflow-hidden">
-                  {p.category === "posters" ? (
-                    <button
-                      type="button"
-                      onClick={() => setLightbox(p.thumbnail)}
-                      className="block w-full h-full"
-                      aria-label={`Open ${p.title}`}
-                    >
-                      <img
-                        src={p.thumbnail}
-                        alt={p.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                      />
-                    </button>
-                  ) : (
-                    <SmartVideo src={p.mediaUrl} poster={p.thumbnail} className="w-full h-full" />
-                  )}
-                  {p.duration && (
-                    <span className="absolute top-3 left-3 font-mono text-[10px] tracking-[0.15em] bg-void/70 text-paper px-2 py-1">
-                      {p.duration}
-                    </span>
-                  )}
-                  <span className={`absolute top-3 right-3 ${label} bg-void/70 text-lime px-2 py-1`}>
-                    {p.year}
-                  </span>
-                </div>
-                <div className="p-5 flex flex-col gap-3">
-                  <h3 className={`${display} font-normal text-[1.4rem] leading-[1] text-paper`}>
-                    {p.title}
-                  </h3>
-                  <p className="text-[13px] leading-[1.55] text-ash">{p.description}</p>
-                  {p.prompt && (
-                    <p className="text-[11px] leading-[1.5] text-paper/60 italic border-l border-lime/60 pl-3">
-                      "{p.prompt}"
-                    </p>
-                  )}
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {p.tools.map((t) => (
-                      <span key={t} className="text-[10px] tracking-[0.1em] uppercase border border-paper/15 px-2 py-1 text-paper/80">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                  {p.client && (
-                    <div className={`${label} text-ash mt-1`}>Client — {p.client}</div>
-                  )}
-                </div>
-              </motion.article>
+                <img
+                  src={p.thumbnail}
+                  alt={p.title}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                />
+                <span className={`absolute top-3 left-3 ${label} bg-void/70 text-paper px-2 py-1`}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </motion.button>
             ))}
           </AnimatePresence>
         </motion.div>
+
+        {hasMore && (
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="inline-flex items-center gap-2 border border-lime text-lime px-6 py-3 font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-lime hover:text-paper transition-colors"
+            >
+              {expanded ? "See less ↑" : `See more (${portfolio.length - INITIAL_POSTERS}) ↓`}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Lightbox */}
