@@ -8,6 +8,7 @@ import { SmartVideo, VideoProvider } from "./VideoManager";
 import { Marquee, BlurFade, WordRotate, DotPattern, ShimmerButton } from "./magic";
 import { portfolio, categories, type PortfolioCategory } from "@/lib/portfolio-data";
 import { InteractiveRobotSpline } from "./ui/interactive-3d-robot";
+import { VideosSection } from "./VideosSection";
 
 const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
 
