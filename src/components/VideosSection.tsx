@@ -65,6 +65,7 @@ function VideoTile({ src, index }: { src: string; index: number }) {
   const { register, play } = useVideoManager();
   const [playing, setPlaying] = useState(false);
   const [orientation, setOrientation] = useState<"landscape" | "portrait" | "square">("landscape");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [optimized] = useState(() => optimizedSrc(src, pickQualityHeight()));
 
   useEffect(() => {
@@ -84,6 +85,15 @@ function VideoTile({ src, index }: { src: string; index: number }) {
     );
     io.observe(el);
     return () => io.disconnect();
+  }, []);
+
+  // Sync fullscreen state so we can switch the video from cover to contain.
+  useEffect(() => {
+    const onChange = () => {
+      setIsFullscreen(document.fullscreenElement === wrapRef.current);
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
 
   const onMeta = () => {
