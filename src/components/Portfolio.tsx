@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
 import { useRef, useState } from "react";
 import { HairlineGrid } from "./HairlineGrid";
 import { VideoProvider } from "./VideoManager";
-import { Marquee, BlurFade, WordRotate, ShimmerButton } from "./magic";
+import { Marquee, BlurFade, WordRotate } from "./magic";
 import { portfolio } from "@/lib/portfolio-data";
 import { InteractiveRobotSpline } from "./ui/interactive-3d-robot";
 import { VideosSection } from "./VideosSection";
