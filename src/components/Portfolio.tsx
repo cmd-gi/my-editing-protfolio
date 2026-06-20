@@ -2,11 +2,11 @@ const portraitHero = "/__l5e/assets-v1/9f2c0f6b-85d2-41a7-9e29-baa10a0732f9/port
 const portraitAbout = "/__l5e/assets-v1/3546a4a6-3deb-4789-a567-2c8e56d27007/portrait-about.png";
 
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { HairlineGrid } from "./HairlineGrid";
-import { SmartVideo, VideoProvider } from "./VideoManager";
-import { Marquee, BlurFade, WordRotate, DotPattern, ShimmerButton } from "./magic";
-import { portfolio, categories, type PortfolioCategory } from "@/lib/portfolio-data";
+import { VideoProvider } from "./VideoManager";
+import { Marquee, BlurFade, WordRotate, ShimmerButton } from "./magic";
+import { portfolio } from "@/lib/portfolio-data";
 import { InteractiveRobotSpline } from "./ui/interactive-3d-robot";
 import { VideosSection } from "./VideosSection";
 
