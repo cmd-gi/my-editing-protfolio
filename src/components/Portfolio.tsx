@@ -103,23 +103,6 @@ function Hero() {
               if it moves on a screen, I probably want to play with it.
             </p>
             <div className="h-px w-full bg-paper/15" />
-            <div className="flex flex-wrap items-center gap-3">
-              <ShimmerButton
-                onClick={() => document.querySelector("#portfolio")?.scrollIntoView({ behavior: "smooth" })}
-                className="inline-flex items-center gap-2 bg-lime text-paper px-5 py-3 font-mono text-[11px] tracking-[0.18em] uppercase hover:bg-paper hover:text-void transition-colors"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <span className="block w-0 h-0 border-y-[5px] border-y-transparent border-l-[8px] border-l-current" />
-                  View Showreel
-                </span>
-              </ShimmerButton>
-              <a
-                href="mailto:32charan@gmail.com?subject=Resume%20Request"
-                className="inline-flex items-center gap-2 border border-paper/40 px-5 py-3 font-mono text-[11px] tracking-[0.18em] uppercase text-paper hover:border-lime hover:text-lime transition-colors"
-              >
-                Download Resume ↓
-              </a>
-            </div>
             <ul className="font-mono text-[10px] tracking-[0.18em] uppercase text-paper/70 space-y-1.5 mt-2">
               <li>→ Video Editor (the obsessive kind)</li>
               <li>→ Colorist · teal &amp; orange enthusiast</li>
