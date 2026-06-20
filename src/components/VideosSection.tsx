@@ -182,7 +182,7 @@ function VideoTile({ src, index }: { src: string; index: number }) {
           onClick={toggle}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
-          className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+          className={videoClass}
         />
         {!playing && (
           <button
