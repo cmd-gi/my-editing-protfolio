@@ -1,4 +1,4 @@
-export type PortfolioCategory = "edited-videos" | "posters" | "ai";
+export type PortfolioCategory = "edited-videos" | "posters";
 
 export interface PortfolioItem {
   id: string;
@@ -11,116 +11,35 @@ export interface PortfolioItem {
   client?: string;
   year: string;
   duration?: string;
-  prompt?: string;
 }
 
 export const categories: { id: PortfolioCategory | "all"; label: string }[] = [
   { id: "all", label: "All Work" },
   { id: "edited-videos", label: "Edited Videos" },
   { id: "posters", label: "Posters & Designs" },
-  { id: "ai", label: "AI Creations" },
 ];
 
-// Placeholder gradient thumbnails — replace thumbnail/mediaUrl with hosted media later.
-const grad = (a: string, b: string) =>
-  `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${a}'/><stop offset='1' stop-color='${b}'/></linearGradient></defs><rect width='1600' height='1000' fill='url(%23g)'/></svg>`;
-
-export const portfolio: PortfolioItem[] = [
-  {
-    id: "v-01",
-    title: "Sanchi Atelier — Campaign Film",
-    category: "edited-videos",
-    thumbnail: grad("%231a1a1a", "%23D86B1D"),
-    mediaUrl: "",
-    description: "Cinematic brand film blending product storytelling with editorial color grading.",
-    tools: ["DaVinci Resolve", "After Effects"],
-    client: "Sanchi Atelier",
-    year: "2025",
-    duration: "1:42",
-  },
-  {
-    id: "v-02",
-    title: "Reel — Festival Recap",
-    category: "edited-videos",
-    thumbnail: grad("%23161616", "%23444"),
-    mediaUrl: "",
-    description: "High-energy short-form recap with speed ramping and motion transitions.",
-    tools: ["DaVinci Resolve", "CapCut"],
-    year: "2025",
-    duration: "0:38",
-  },
-  {
-    id: "v-03",
-    title: "Brand Promo — Atelier SS26",
-    category: "edited-videos",
-    thumbnail: grad("%230E0E0E", "%23D86B1D"),
-    mediaUrl: "",
-    description: "Promotional film with curated color palette and rhythmic cuts.",
-    tools: ["After Effects", "DaVinci Resolve"],
-    client: "Sanchi Atelier",
-    year: "2026",
-    duration: "0:54",
-  },
-  {
-    id: "p-01",
-    title: "Editorial Poster — Issue 01",
-    category: "posters",
-    thumbnail: grad("%23222", "%23F5F2EA"),
-    description: "Typographic poster series exploring negative space and contrast.",
-    tools: ["Photoshop", "Lightroom"],
-    year: "2025",
-  },
-  {
-    id: "p-02",
-    title: "Campaign Key Art",
-    category: "posters",
-    thumbnail: grad("%23D86B1D", "%231E1E1E"),
-    description: "Print-ready key art for seasonal launch with cinematic retouching.",
-    tools: ["Photoshop", "Lightroom"],
-    client: "Sanchi Atelier",
-    year: "2025",
-  },
-  {
-    id: "p-03",
-    title: "Social Tiles — Reel Pack",
-    category: "posters",
-    thumbnail: grad("%23161616", "%23B3B3B3"),
-    description: "Cohesive Instagram tile system designed for narrative flow.",
-    tools: ["Canva", "Photoshop"],
-    year: "2026",
-  },
-  {
-    id: "ai-01",
-    title: "Neon Atelier — Motion Study",
-    category: "ai",
-    thumbnail: grad("%23000", "%23D86B1D"),
-    mediaUrl: "",
-    description: "Generative motion experiment blending AI footage with hand-crafted grade.",
-    tools: ["Runway", "Kling", "DaVinci Resolve"],
-    year: "2026",
-    duration: "0:22",
-    prompt: "Slow cinematic dolly through a neon-lit atelier, 35mm grain, amber key light",
-  },
-  {
-    id: "ai-02",
-    title: "Concept Frames — Flow",
-    category: "ai",
-    thumbnail: grad("%231E1E1E", "%23F5F2EA"),
-    description: "AI-generated concept frames used as moodboard for an editorial campaign.",
-    tools: ["Google Flow", "Higgsfield"],
-    year: "2026",
-    prompt: "Editorial fashion still, soft window light, muted earth tones, medium format film",
-  },
-  {
-    id: "ai-03",
-    title: "Veo Loop — Texture Study",
-    category: "ai",
-    thumbnail: grad("%23D86B1D", "%23000"),
-    mediaUrl: "",
-    description: "Looping abstract textures generated for a brand intro sequence.",
-    tools: ["Veo", "After Effects"],
-    year: "2026",
-    duration: "0:08",
-    prompt: "Macro shot of molten copper folding into silk, slow motion, cinematic lighting",
-  },
+// Posters served directly from Cloudinary in the exact order provided.
+const POSTER_URLS: string[] = [
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954289/Poster2_mfcxop.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954279/10_l1uzli.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954279/1_m5dnxw.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954272/Wedding_Invitation_qbzbz7.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954268/0_rosowq.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954267/h2_w88jwz.jpg",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954264/Owners_ptvvfb.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954242/Invitation_poster__F1_gzcudl.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954240/4_tnq0i6.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954236/2_wor022.png",
+  "https://res.cloudinary.com/drjczsj9l/image/upload/q_auto/f_auto/v1781954233/01_wdkscx.png",
 ];
+
+export const portfolio: PortfolioItem[] = POSTER_URLS.map((url, i) => ({
+  id: `p-${String(i + 1).padStart(2, "0")}`,
+  title: `Poster ${String(i + 1).padStart(2, "0")}`,
+  category: "posters",
+  thumbnail: url,
+  description: "",
+  tools: [],
+  year: "2025",
+}));
