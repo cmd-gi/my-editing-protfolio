@@ -1,4 +1,4 @@
-const portraitHero = "/__l5e/assets-v1/9f2c0f6b-85d2-41a7-9e29-baa10a0732f9/portrait-hero.png";
+import portraitHero from "@/assets/heo-portait.png";
 const portraitAbout = "/__l5e/assets-v1/3546a4a6-3deb-4789-a567-2c8e56d27007/portrait-about.png";
 
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
