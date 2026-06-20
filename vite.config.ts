@@ -34,18 +34,24 @@ export default defineConfig(({ command }) => ({
       },
     }),
     command === "build" &&
-      nitro({
-        preset: process.env.NITRO_PRESET ?? "cloudflare-module",
-        output: {
-          dir: "dist",
-          serverDir: "dist/server",
-          publicDir: "dist/client",
-        },
-        cloudflare: {
-          nodeCompat: true,
-          deployConfig: true,
-        },
-      }),
+      nitro(
+        process.env.VERCEL
+          ? {
+              preset: process.env.NITRO_PRESET ?? "vercel",
+            }
+          : {
+              preset: process.env.NITRO_PRESET ?? "cloudflare-module",
+              output: {
+                dir: "dist",
+                serverDir: "dist/server",
+                publicDir: "dist/client",
+              },
+              cloudflare: {
+                nodeCompat: true,
+                deployConfig: true,
+              },
+            }
+      ),
     viteReact(),
   ].filter(Boolean),
   server: {
