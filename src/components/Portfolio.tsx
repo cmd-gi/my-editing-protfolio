@@ -210,25 +210,6 @@ function About() {
           </p>
         </BlurFade>
 
-        {/* mini stats row */}
-        <div className="relative z-20 mt-10 grid grid-cols-3 gap-4">
-          {[
-            { n: "3+", l: "years\nediting" },
-            { n: "40+", l: "happy\nclients" },
-            { n: "∞", l: "cups of\nchai" },
-          ].map((s, i) => (
-            <BlurFade key={s.l} delay={i * 0.08}>
-              <div className="border border-paper/15 p-4 hover:border-lime hover:-translate-y-1 transition-all duration-300">
-                <div className="font-display font-black text-paper text-[clamp(1.5rem,3vw,2.25rem)] leading-none">
-                  {s.n}
-                </div>
-                <div className="mt-2 font-mono text-[9px] tracking-[0.15em] uppercase text-ash whitespace-pre-line">
-                  {s.l}
-                </div>
-              </div>
-            </BlurFade>
-          ))}
-        </div>
 
         {/* Expertise grid */}
         <div className="relative z-20 mt-14">
