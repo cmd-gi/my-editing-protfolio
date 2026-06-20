@@ -25,18 +25,47 @@ const VIDEO_URLS: string[] = [
 
 const INITIAL_COUNT = 6;
 
+/** Pick a target height based on the visitor's network. Never drops below 480p. */
+function pickQualityHeight(): number {
+  if (typeof navigator === "undefined") return 1080;
+  const conn = (navigator as unknown as { connection?: { effectiveType?: string; saveData?: boolean; downlink?: number } }).connection;
+  if (!conn) return 1080;
+  if (conn.saveData) return 480;
+  switch (conn.effectiveType) {
+    case "slow-2g":
+    case "2g":
+      return 480;
+    case "3g":
+      return 720;
+    case "4g":
+    default:
+      return (conn.downlink ?? 10) >= 5 ? 1080 : 720;
+  }
+}
+
+/** Rewrite a Cloudinary URL to apply auto quality/format + a height cap (min 480p). */
+function optimizedSrc(url: string, height: number): string {
+  const h = Math.max(480, height);
+  return url.replace(
+    /\/video\/upload\/(?:[^/]+\/)*?(v\d+\/)/,
+    `/video/upload/q_auto:good,f_auto,h_${h},c_limit/$1`,
+  );
+}
+
 /** Build a Cloudinary still-frame poster from the source MP4 URL. */
 function posterFor(url: string) {
   return url
-    .replace("/video/upload/", "/video/upload/so_1,w_900,c_fill,q_auto,f_jpg/")
+    .replace(/\/video\/upload\/(?:[^/]+\/)*?(v\d+\/)/, "/video/upload/so_1,w_900,c_fill,q_auto,f_jpg/$1")
     .replace(/\.mp4$/, ".jpg");
 }
 
 function VideoTile({ src, index }: { src: string; index: number }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const { register, play } = useVideoManager();
   const [playing, setPlaying] = useState(false);
   const [orientation, setOrientation] = useState<"landscape" | "portrait" | "square">("landscape");
+  const [optimized] = useState(() => optimizedSrc(src, pickQualityHeight()));
 
   useEffect(() => {
     if (!ref.current) return;
@@ -79,6 +108,29 @@ function VideoTile({ src, index }: { src: string; index: number }) {
     }
   };
 
+  const goFullscreen = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const el = ref.current;
+    const wrap = wrapRef.current;
+    if (!el) return;
+    try {
+      // iOS Safari: only the video element supports fullscreen via webkit API.
+      const anyEl = el as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+      if (anyEl.webkitEnterFullscreen) {
+        anyEl.webkitEnterFullscreen();
+        return;
+      }
+      const target = wrap ?? el;
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await target.requestFullscreen();
+      }
+    } catch {
+      /* ignore — fullscreen denied */
+    }
+  };
+
   const aspect =
     orientation === "portrait"
       ? "aspect-[9/16]"
@@ -97,10 +149,10 @@ function VideoTile({ src, index }: { src: string; index: number }) {
         orientation === "portrait" ? "md:row-span-2" : ""
       }`}
     >
-      <div className={`relative w-full ${aspect} bg-void`}>
+      <div ref={wrapRef} className={`relative w-full ${aspect} bg-void`}>
         <video
           ref={ref}
-          src={src}
+          src={optimized}
           poster={posterFor(src)}
           playsInline
           preload="metadata"
@@ -128,6 +180,16 @@ function VideoTile({ src, index }: { src: string; index: number }) {
         <span className={`absolute top-3 right-3 ${label} bg-void/70 text-lime px-2 py-1`}>
           {orientation === "portrait" ? "9:16" : orientation === "square" ? "1:1" : "16:9"}
         </span>
+        <button
+          type="button"
+          onClick={goFullscreen}
+          aria-label="Play fullscreen"
+          className="absolute bottom-3 right-3 z-10 inline-flex items-center justify-center w-9 h-9 bg-void/70 hover:bg-lime hover:text-paper text-paper border border-paper/30 transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          </svg>
+        </button>
       </div>
     </motion.article>
   );
