@@ -157,7 +157,9 @@ function VideoTile({ src, index }: { src: string; index: number }) {
     : `relative w-full ${aspect} bg-void`;
 
   const videoClass = isFullscreen
-    ? "max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
+    ? orientation === "portrait"
+      ? "max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
+      : "absolute inset-0 w-full h-full object-cover cursor-pointer"
     : "absolute inset-0 w-full h-full object-cover cursor-pointer";
 
   return (
