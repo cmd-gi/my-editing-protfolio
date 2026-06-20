@@ -158,105 +158,36 @@ const tools = {
 function About() {
   return (
     <section id="about" className="relative grid grid-cols-1 md:grid-cols-2 min-h-[90vh] bg-warm">
-      {/* LEFT — playful portrait collage */}
-      <div className="relative bg-editorial overflow-hidden min-h-[70vh] md:min-h-0 flex items-center justify-center p-8 md:p-12">
-        <DotPattern className="opacity-50" />
-        {/* floating mint blob */}
-        <motion.div
-          aria-hidden
-          animate={{ y: [0, -18, 0], rotate: [0, 4, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -left-20 -top-20 w-[420px] h-[420px] rounded-full bg-lime/60 blur-[2px]"
-        />
-        {/* floating pink blob */}
-        <motion.div
-          aria-hidden
-          animate={{ y: [0, 14, 0], x: [0, -10, 0] }}
-          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -right-24 bottom-10 w-[260px] h-[260px] rounded-full bg-signal/30 blur-[3px]"
-        />
-        {/* pink star burst */}
-        <motion.div
-          aria-hidden
-          animate={{ rotate: 360 }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-          className="absolute right-10 top-12 select-none pointer-events-none font-display font-black text-signal text-[clamp(2rem,5vw,4rem)] leading-none"
-        >
-          ✺
-        </motion.div>
-
-        {/* main polaroid */}
-        <motion.div
-          initial={{ rotate: -4, y: 20, opacity: 0 }}
-          whileInView={{ rotate: -4, y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="relative z-10 bg-editorial p-3 pb-6 shadow-[10px_12px_0_0_rgba(20,24,27,0.85)] max-w-[78%]"
-        >
-          <div className="relative aspect-[4/5] overflow-hidden bg-warm">
-            <img
-              src={portraitAbout}
-              alt="Charan in studio"
-              loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
-            />
-            <span className="absolute top-3 left-3 bg-signal text-paper px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] uppercase">
-              Now Playing
-            </span>
+      {/* LEFT — interactive 3D robot stage */}
+      <div className="relative bg-warm overflow-hidden min-h-[70vh] md:min-h-0 flex items-center justify-center p-6 md:p-10">
+        <div className="relative w-full h-full min-h-[60vh] md:min-h-[80vh] bg-editorial border border-paper/15 shadow-[8px_8px_0_0_var(--lime)] overflow-hidden">
+          {/* soft lime glow behind the robot */}
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--lime) 22%, transparent), transparent 65%)" }}
+          />
+          {/* the robot fills the stage */}
+          <div className="absolute inset-0">
+            <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="!w-full !h-full" />
           </div>
-          <div className="mt-3 flex items-center justify-between font-mono text-[10px] tracking-[0.15em] uppercase text-charcoal/70">
-            <span>charan · 2026</span>
-            <span>● rec</span>
+          {/* subtle lime tint to nudge robot toward theme */}
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none mix-blend-multiply"
+            style={{ background: "color-mix(in oklab, var(--lime) 10%, transparent)" }}
+          />
+          {/* chips */}
+          <div className={`${label} text-charcoal/70 absolute top-3 left-3 z-20`}>// say hi to whobee</div>
+          <div className={`${label} text-lime absolute top-3 right-3 z-20`}>drag · click · poke</div>
+          <div className="absolute bottom-3 left-3 z-20 -rotate-2 bg-signal text-paper px-2 py-1 font-mono text-[9px] tracking-[0.18em] uppercase shadow-[3px_3px_0_0_rgba(20,24,27,0.85)]">
+            ★ studio mascot
           </div>
-        </motion.div>
-
-        {/* sticky note */}
-        <motion.div
-          initial={{ rotate: 6, scale: 0.9, opacity: 0 }}
-          whileInView={{ rotate: 6, scale: 1, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="absolute right-6 md:right-10 bottom-10 z-20 bg-lime text-paper p-4 w-[180px] shadow-[6px_6px_0_0_rgba(20,24,27,0.85)]"
-        >
-          <div className="font-mono text-[10px] tracking-[0.15em] uppercase mb-1.5">// note to self</div>
-          <div className="font-display font-black lowercase leading-[1] text-[1.4rem]">
-            grade it like<br />it owes you<br />money.
+          <div className="absolute bottom-3 right-3 z-30 bg-paper text-editorial font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1">
+            live · 3d
           </div>
-        </motion.div>
-
-        {/* timecode chip */}
-        <div className="absolute left-6 bottom-6 z-20 -rotate-3 bg-paper text-void font-mono text-[10px] tracking-[0.2em] px-2 py-1">
-          00:00:24:18
-        </div>
-
-        {/* stats card — floats top-right */}
-        <motion.div
-          initial={{ opacity: 0, y: -10, rotate: 3 }}
-          whileInView={{ opacity: 1, y: 0, rotate: 3 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="absolute top-6 right-6 md:top-10 md:right-12 z-20 bg-editorial border-2 border-paper p-3 shadow-[5px_5px_0_0_rgba(20,24,27,0.85)]"
-        >
-          <div className="font-display font-black text-paper leading-none text-[2rem]">120+</div>
-          <div className="font-mono text-[9px] tracking-[0.18em] uppercase text-charcoal/70 mt-1">
-            edits<br />delivered
-          </div>
-        </motion.div>
-
-        {/* mini film strip — bottom */}
-        <div className="absolute left-0 right-0 bottom-0 z-10 overflow-hidden">
-          <Marquee speed={28} className="bg-paper py-2 border-t-2 border-paper">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.2em] uppercase text-void"
-              >
-                <span className="inline-block w-3 h-3 bg-void" />
-                frame {String(i + 1).padStart(3, "0")}
-                <span className="text-lime">●</span>
-              </span>
-            ))}
-          </Marquee>
+          {/* watermark cover — hides "Built with Spline" badge */}
+          <div aria-hidden className="absolute bottom-0 right-0 z-20 w-[190px] h-[52px] bg-editorial pointer-events-none" />
         </div>
       </div>
 
