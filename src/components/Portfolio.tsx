@@ -262,24 +262,6 @@ function About() {
           ))}
         </div>
 
-        {/* Interactive 3D robot — fills the empty space, playful touch */}
-        <div className="relative z-20 mt-14">
-          <div className="flex items-center justify-between mb-4">
-            <div className={`${label} text-ash`}>// say hi to whobee</div>
-            <div className={`${label} text-lime`}>drag · click · poke</div>
-          </div>
-          <div className="relative h-[360px] md:h-[420px] bg-editorial border border-paper/15 overflow-hidden shadow-[6px_6px_0_0_var(--lime)]">
-            <div className="absolute inset-0">
-              <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="!w-full !h-full" />
-            </div>
-            <div className="absolute top-3 left-3 z-10 -rotate-2 bg-signal text-paper px-2 py-1 font-mono text-[9px] tracking-[0.18em] uppercase shadow-[3px_3px_0_0_rgba(20,24,27,0.85)]">
-              ★ studio mascot
-            </div>
-            <div className="absolute bottom-3 right-3 z-10 bg-paper/90 text-void font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1">
-              live · 3d
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
