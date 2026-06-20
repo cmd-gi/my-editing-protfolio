@@ -565,6 +565,7 @@ export function Portfolio() {
         <Hero />
         <About />
         <CreditsTicker />
+        <VideosSection />
         <PortfolioGrid />
         <Experience />
         <Contact />
