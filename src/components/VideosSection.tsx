@@ -25,10 +25,37 @@ const VIDEO_URLS: string[] = [
 
 const INITIAL_COUNT = 6;
 
+/** Pick a target height based on the visitor's network. Never drops below 480p. */
+function pickQualityHeight(): number {
+  if (typeof navigator === "undefined") return 1080;
+  const conn = (navigator as unknown as { connection?: { effectiveType?: string; saveData?: boolean; downlink?: number } }).connection;
+  if (!conn) return 1080;
+  if (conn.saveData) return 480;
+  switch (conn.effectiveType) {
+    case "slow-2g":
+    case "2g":
+      return 480;
+    case "3g":
+      return 720;
+    case "4g":
+    default:
+      return (conn.downlink ?? 10) >= 5 ? 1080 : 720;
+  }
+}
+
+/** Rewrite a Cloudinary URL to apply auto quality/format + a height cap (min 480p). */
+function optimizedSrc(url: string, height: number): string {
+  const h = Math.max(480, height);
+  return url.replace(
+    /\/video\/upload\/(?:[^/]+\/)*?(v\d+\/)/,
+    `/video/upload/q_auto:good,f_auto,h_${h},c_limit/$1`,
+  );
+}
+
 /** Build a Cloudinary still-frame poster from the source MP4 URL. */
 function posterFor(url: string) {
   return url
-    .replace("/video/upload/", "/video/upload/so_1,w_900,c_fill,q_auto,f_jpg/")
+    .replace(/\/video\/upload\/(?:[^/]+\/)*?(v\d+\/)/, "/video/upload/so_1,w_900,c_fill,q_auto,f_jpg/$1")
     .replace(/\.mp4$/, ".jpg");
 }
 
