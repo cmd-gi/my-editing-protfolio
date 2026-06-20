@@ -159,6 +159,8 @@ function VideoTile({ src, index }: { src: string; index: number }) {
   const videoClass = isFullscreen
     ? "max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
     : "absolute inset-0 w-full h-full object-cover cursor-pointer";
+
+  return (
     <motion.article
       layout
       initial={{ opacity: 0, y: 24 }}
@@ -169,7 +171,7 @@ function VideoTile({ src, index }: { src: string; index: number }) {
         orientation === "portrait" ? "md:row-span-2" : ""
       }`}
     >
-      <div ref={wrapRef} className={`relative w-full ${aspect} bg-void`}>
+      <div ref={wrapRef} className={wrapClass}>
         <video
           ref={ref}
           src={optimized}
