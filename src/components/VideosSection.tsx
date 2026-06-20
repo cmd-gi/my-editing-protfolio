@@ -124,17 +124,21 @@ function VideoTile({ src, index }: { src: string; index: number }) {
     const wrap = wrapRef.current;
     if (!el) return;
     try {
+      // Start playback if still paused, then enter fullscreen.
+      if (el.paused) {
+        el.muted = false;
+        play(el);
+      }
       // iOS Safari: only the video element supports fullscreen via webkit API.
       const anyEl = el as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
       if (anyEl.webkitEnterFullscreen) {
         anyEl.webkitEnterFullscreen();
         return;
       }
-      const target = wrap ?? el;
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       } else {
-        await target.requestFullscreen();
+        await (wrap ?? el).requestFullscreen();
       }
     } catch {
       /* ignore — fullscreen denied */
@@ -148,7 +152,13 @@ function VideoTile({ src, index }: { src: string; index: number }) {
         ? "aspect-square"
         : "aspect-video";
 
-  return (
+  const wrapClass = isFullscreen
+    ? "fixed inset-0 z-50 flex items-center justify-center bg-void"
+    : `relative w-full ${aspect} bg-void`;
+
+  const videoClass = isFullscreen
+    ? "max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
+    : "absolute inset-0 w-full h-full object-cover cursor-pointer";
     <motion.article
       layout
       initial={{ opacity: 0, y: 24 }}
