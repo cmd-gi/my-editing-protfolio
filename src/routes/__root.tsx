@@ -10,7 +10,11 @@ import {
 import { type ReactNode } from "react";
 
 import { SmoothScroll } from "@/components/SmoothScroll";
+import portraitHero from "@/assets/heo-portait.png";
 import appCss from "../styles.css?url";
+
+const fontStylesheet =
+  "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Figtree:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap";
 
 function NotFoundComponent() {
   return (
@@ -86,10 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Figtree:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap",
-      },
+      { rel: "preload", as: "image", href: portraitHero, fetchPriority: "high" },
       { rel: "stylesheet", href: appCss },
     ],
   }),
@@ -104,6 +105,18 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <link rel="preload" as="style" href={fontStylesheet} />
+        <link
+          rel="stylesheet"
+          href={fontStylesheet}
+          media="print"
+          onLoad={(event) => {
+            event.currentTarget.media = "all";
+          }}
+        />
+        <noscript>
+          <link rel="stylesheet" href={fontStylesheet} />
+        </noscript>
       </head>
       <body>
         {children}

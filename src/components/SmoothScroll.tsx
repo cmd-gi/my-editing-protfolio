@@ -14,7 +14,11 @@ export function SmoothScroll() {
     }
     window.scrollTo(0, 0);
 
-    if (window.matchMedia("(hover: none), (max-width: 1023px)").matches) {
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      return;
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 

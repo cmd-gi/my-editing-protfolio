@@ -46,8 +46,8 @@ export function BlurFade({
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y, filter: "blur(10px)" }}
-      animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+      initial={{ opacity: 0, y }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
       className={className}
     >
@@ -74,11 +74,10 @@ export function WordRotate({
           key={w}
           className="inline-block"
           style={{ position: i === 0 ? "relative" : "absolute", left: 0, top: 0 }}
-          initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{
             opacity: [0, 1, 1, 0],
             y: [20, 0, 0, -20],
-            filter: ["blur(8px)", "blur(0px)", "blur(0px)", "blur(8px)"],
           }}
           transition={{
             duration: (duration * words.length) / 1000,

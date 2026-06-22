@@ -39,9 +39,9 @@ const ASPECT_CLASS: Record<VideoRatio, string> = {
 };
 
 const POSTER_DIMENSIONS: Record<VideoRatio, string> = {
-  "9:16": "w_900,h_1600",
-  "16:9": "w_1600,h_900",
-  "1:1": "w_1200,h_1200",
+  "9:16": "w_500,h_889",
+  "16:9": "w_500,h_281",
+  "1:1": "w_500,h_500",
 };
 
 function hasMorePortraitDetail(declared: VideoRatio, actual: VideoRatio) {
@@ -82,7 +82,7 @@ function posterFor(url: string, ratio: VideoRatio) {
   return url
     .replace(
       /\/video\/upload\/(?:[^/]+\/)*?(v\d+\/)/,
-      `/video/upload/so_1,${POSTER_DIMENSIONS[ratio]},c_fit,q_auto,f_jpg/$1`,
+      `/video/upload/so_1,${POSTER_DIMENSIONS[ratio]},c_fit,q_auto,f_auto/$1`,
     )
     .replace(/\.mp4$/, ".jpg");
 }

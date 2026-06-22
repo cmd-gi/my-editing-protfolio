@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, lazy } from 'react';
-const Spline = lazy(() => import('@splinetool/react-spline'));
+import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface InteractiveRobotSplineProps {
   scene: string;
@@ -9,19 +9,73 @@ interface InteractiveRobotSplineProps {
 }
 
 export function InteractiveRobotSpline({ scene, className }: InteractiveRobotSplineProps) {
-  return (
-    <Suspense
-      fallback={
-        <div className={`w-full h-full flex items-center justify-center bg-warm text-paper ${className ?? ''}`}>
-          <svg className="animate-spin h-5 w-5 text-lime mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l2-2.647z" />
-          </svg>
-          <span className="font-mono text-[10px] tracking-[0.18em] uppercase">loading whobee…</span>
-        </div>
+  const stageRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const [shouldMount, setShouldMount] = useState(false);
+  const [observe, setObserve] = useState(false);
+  const [SplineComponent, setSplineComponent] = useState<ComponentType<{ scene: string; className?: string }> | null>(null);
+
+  useEffect(() => {
+    if (isMobile) return;
+    if (typeof window === "undefined") return;
+
+    if (window.scrollY > 0) {
+      setObserve(true);
+      return;
+    }
+
+    const onFirstScroll = () => {
+      if (window.scrollY > 0) {
+        setObserve(true);
       }
-    >
-      <Spline scene={scene} className={className} />
-    </Suspense>
+    };
+
+    window.addEventListener("scroll", onFirstScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onFirstScroll);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile || !observe) return;
+    const el = stageRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldMount(true);
+        }
+      },
+      { rootMargin: '0px', threshold: 0.01 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isMobile, observe]);
+
+  useEffect(() => {
+    if (!shouldMount || isMobile || SplineComponent) return;
+    let cancelled = false;
+
+    import('@splinetool/react-spline').then((mod) => {
+      if (!cancelled) {
+        setSplineComponent(() => mod.default);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [SplineComponent, isMobile, shouldMount]);
+
+  if (isMobile) return null;
+
+  return (
+    <div ref={stageRef} className={`relative w-full h-full ${className ?? ''}`}>
+      {SplineComponent ? (
+        <SplineComponent scene={scene} className="w-full h-full" />
+      ) : (
+        <div className="w-full h-full bg-charcoal" aria-hidden />
+      )}
+    </div>
   );
 }
