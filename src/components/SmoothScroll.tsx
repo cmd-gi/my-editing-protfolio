@@ -14,6 +14,10 @@ export function SmoothScroll() {
     }
     window.scrollTo(0, 0);
 
+    if (window.matchMedia("(hover: none), (max-width: 1023px)").matches) {
+      return;
+    }
+
     const lenis = new Lenis({ duration: 1.2, smoothWheel: true });
     let raf = 0;
     const tick = (t: number) => {

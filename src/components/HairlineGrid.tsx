@@ -1,7 +1,7 @@
 export function HairlineGrid({ light = false }: { light?: boolean }) {
   const color = light ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)";
   return (
-    <div className="pointer-events-none absolute inset-0 z-10" aria-hidden>
+    <div className="hidden md:block pointer-events-none absolute inset-0 z-10" aria-hidden>
       {[1, 2, 3].map((i) => (
         <div
           key={i}

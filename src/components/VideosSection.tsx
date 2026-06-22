@@ -6,31 +6,56 @@ import { HairlineGrid } from "./HairlineGrid";
 const display = "font-display tracking-[-0.025em]";
 const label = "font-mono text-[10px] tracking-[0.18em] uppercase";
 
+type VideoRatio = "9:16" | "16:9" | "1:1";
+
+type VideoItem = {
+  src: string;
+  ratio: VideoRatio;
+};
+
 // Exact order as provided by the user.
-const VIDEO_URLS: string[] = [
-  "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955971/Final_Draft_3_xtgsqt.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955912/Sanchi_c1_ge74wi.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/v1779079702/e_tpkvuf.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1779079702/e_tpkvuf.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955733/Manvith_1_f7amco.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955666/d1_mullug.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781956579/NEWEST_viral_editing_style_Linked_Comp_01_rmsbrz.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1779079788/Sanchi_2_nc_jqberd.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781956482/class2_pxvdph.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781956260/Shot_2_pvun8l.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781955841/Classic_350_dt91un.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781955724/Sanchi_3_r2675i.mp4",
-  "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781955760/w_Walk_ow6x6a.mp4",
+// TODO: if any filename below is mislabeled, correct the ratio here in one place.
+const VIDEOS: VideoItem[] = [
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955971/Final_Draft_3_xtgsqt.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955912/Sanchi_c1_ge74wi.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1779079702/e_tpkvuf.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955733/Manvith_1_f7amco.mp4", ratio: "16:9" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/v1781955666/d1_mullug.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781956579/NEWEST_viral_editing_style_Linked_Comp_01_rmsbrz.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1779079788/Sanchi_2_nc_jqberd.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781956482/class2_pxvdph.mp4", ratio: "16:9" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781956260/Shot_2_pvun8l.mp4", ratio: "16:9" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781955841/Classic_350_dt91un.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781955724/Sanchi_3_r2675i.mp4", ratio: "9:16" },
+  { src: "https://res.cloudinary.com/drjczsj9l/video/upload/q_auto/f_auto/v1781955760/w_Walk_ow6x6a.mp4", ratio: "9:16" },
 ];
 
 const INITIAL_COUNT = 6;
 
+const ASPECT_CLASS: Record<VideoRatio, string> = {
+  "9:16": "aspect-[9/16]",
+  "16:9": "aspect-video",
+  "1:1": "aspect-square",
+};
+
+const POSTER_DIMENSIONS: Record<VideoRatio, string> = {
+  "9:16": "w_900,h_1600",
+  "16:9": "w_1600,h_900",
+  "1:1": "w_1200,h_1200",
+};
+
+function hasMorePortraitDetail(declared: VideoRatio, actual: VideoRatio) {
+  return declared !== actual;
+}
+
 /** Pick a target height based on the visitor's network. Never drops below 480p. */
 function pickQualityHeight(): number {
-  if (typeof navigator === "undefined") return 1080;
+  if (typeof window === "undefined" || typeof navigator === "undefined") return 1080;
   const conn = (navigator as unknown as { connection?: { effectiveType?: string; saveData?: boolean; downlink?: number } }).connection;
-  if (!conn) return 1080;
+  const viewportIsDesktop = window.innerWidth >= 1024;
+  if (!conn) return viewportIsDesktop ? 1080 : 720;
   if (conn.saveData) return 480;
+  if (!viewportIsDesktop) return 720;
   switch (conn.effectiveType) {
     case "slow-2g":
     case "2g":
@@ -53,63 +78,95 @@ function optimizedSrc(url: string, height: number): string {
 }
 
 /** Build a Cloudinary still-frame poster from the source MP4 URL. */
-function posterFor(url: string) {
+function posterFor(url: string, ratio: VideoRatio) {
   return url
-    .replace(/\/video\/upload\/(?:[^/]+\/)*?(v\d+\/)/, "/video/upload/so_1,w_900,c_fill,q_auto,f_jpg/$1")
+    .replace(
+      /\/video\/upload\/(?:[^/]+\/)*?(v\d+\/)/,
+      `/video/upload/so_1,${POSTER_DIMENSIONS[ratio]},c_fit,q_auto,f_jpg/$1`,
+    )
     .replace(/\.mp4$/, ".jpg");
 }
 
-function VideoTile({ src, index }: { src: string; index: number }) {
+function VideoTile({ src, ratio, index }: { src: string; ratio: VideoRatio; index: number }) {
   const ref = useRef<HTMLVideoElement>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const { register, play } = useVideoManager();
   const [playing, setPlaying] = useState(false);
-  const [orientation, setOrientation] = useState<"landscape" | "portrait" | "square">("landscape");
+  const [declaredRatio, setDeclaredRatio] = useState<VideoRatio>(ratio);
+  const [mounted, setMounted] = useState(false);
+  const [shouldPlayOnMount, setShouldPlayOnMount] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [optimized] = useState(() => optimizedSrc(src, pickQualityHeight()));
 
   useEffect(() => {
-    if (!ref.current) return;
-    return register(ref.current);
-  }, [register]);
-
-  // Pause when scrolled out of view (in addition to global tab-hidden handling).
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const frame = frameRef.current;
+    if (!frame) return;
     const io = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting && !el.paused) el.pause();
+        if (e.isIntersecting) {
+          setMounted(true);
+          return;
+        }
+        const el = ref.current;
+        if (el && !el.paused) el.pause();
+        if (!playing) setMounted(false);
       },
-      { threshold: 0.35 },
+      { rootMargin: "200px 0px", threshold: 0.01 },
     );
-    io.observe(el);
+    io.observe(frame);
     return () => io.disconnect();
-  }, []);
+  }, [playing]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const el = ref.current;
+    if (!el) return;
+    const unregister = register(el);
+    if (shouldPlayOnMount) {
+      setShouldPlayOnMount(false);
+      play(el);
+    }
+    return () => {
+      unregister();
+      if (!el.paused) el.pause();
+      el.removeAttribute("src");
+      el.load();
+    };
+  }, [mounted, play, register, shouldPlayOnMount]);
 
   // Sync fullscreen state so we can switch the video from cover to contain.
   useEffect(() => {
     const onChange = () => {
-      setIsFullscreen(document.fullscreenElement === wrapRef.current);
+      setIsFullscreen(document.fullscreenElement === frameRef.current);
     };
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
 
-  const onMeta = () => {
+  useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const w = el.videoWidth;
-    const h = el.videoHeight;
-    if (!w || !h) return;
-    if (h > w * 1.05) setOrientation("portrait");
-    else if (w > h * 1.05) setOrientation("landscape");
-    else setOrientation("square");
-  };
+    if (!el || !mounted) return;
+    const onLoaded = () => {
+      const w = el.videoWidth;
+      const h = el.videoHeight;
+      if (!w || !h) return;
+      const nextRatio: VideoRatio = h > w * 1.05 ? "9:16" : w > h * 1.05 ? "16:9" : "1:1";
+      if (hasMorePortraitDetail(declaredRatio, nextRatio)) {
+        setDeclaredRatio(nextRatio);
+      }
+    };
+    onLoaded();
+    el.addEventListener("loadedmetadata", onLoaded);
+    return () => el.removeEventListener("loadedmetadata", onLoaded);
+  }, [declaredRatio, mounted]);
 
   const toggle = () => {
     const el = ref.current;
-    if (!el) return;
+    if (!el) {
+      setMounted(true);
+      setShouldPlayOnMount(true);
+      return;
+    }
     if (el.paused) {
       el.muted = false;
       play(el);
@@ -121,7 +178,7 @@ function VideoTile({ src, index }: { src: string; index: number }) {
   const goFullscreen = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const el = ref.current;
-    const wrap = wrapRef.current;
+    const wrap = frameRef.current;
     if (!el) return;
     try {
       // Start playback if still paused, then enter fullscreen.
@@ -145,47 +202,48 @@ function VideoTile({ src, index }: { src: string; index: number }) {
     }
   };
 
-  const aspect =
-    orientation === "portrait"
-      ? "aspect-[9/16]"
-      : orientation === "square"
-        ? "aspect-square"
-        : "aspect-video";
+  const aspect = ASPECT_CLASS[declaredRatio];
 
   const wrapClass = isFullscreen
     ? "fixed inset-0 z-50 flex items-center justify-center bg-void"
     : `relative w-full ${aspect} bg-void`;
 
-  const videoClass = isFullscreen
-    ? orientation === "portrait"
-      ? "max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
-      : "absolute inset-0 w-full h-full object-cover cursor-pointer"
+  const videoClass = isFullscreen && declaredRatio === "9:16"
+    ? "max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
     : "absolute inset-0 w-full h-full object-cover cursor-pointer";
 
   return (
     <motion.article
-      layout
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.45, delay: (index % 6) * 0.04 }}
       className={`group relative bg-charcoal border border-paper/[0.06] hover:border-lime/40 transition-colors overflow-hidden ${
-        orientation === "portrait" ? "md:row-span-2" : ""
+        declaredRatio === "9:16" ? "md:row-span-2" : ""
       }`}
     >
-      <div ref={wrapRef} className={wrapClass}>
-        <video
-          ref={ref}
-          src={optimized}
-          poster={posterFor(src)}
-          playsInline
-          preload="metadata"
-          onLoadedMetadata={onMeta}
-          onClick={toggle}
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          className={videoClass}
-        />
+      <div ref={frameRef} className={wrapClass}>
+        {!mounted ? (
+          <img
+            src={posterFor(src, declaredRatio)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <video
+            ref={ref}
+            src={optimized}
+            poster={posterFor(src, declaredRatio)}
+            playsInline
+            preload="metadata"
+            onClick={toggle}
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            className={videoClass}
+          />
+        )}
         {!playing && (
           <button
             type="button"
@@ -193,7 +251,7 @@ function VideoTile({ src, index }: { src: string; index: number }) {
             aria-label="Play video"
             className="absolute inset-0 flex items-center justify-center bg-void/25 hover:bg-void/40 transition-colors"
           >
-            <span className="w-16 h-16 rounded-full border border-paper/70 flex items-center justify-center backdrop-blur-sm bg-void/40 group-hover:scale-105 transition-transform">
+            <span className="w-16 h-16 rounded-full border border-paper/70 flex items-center justify-center bg-void/60 group-hover:scale-105 transition-transform">
               <span className="block w-0 h-0 border-y-[9px] border-y-transparent border-l-[14px] border-l-paper ml-1" />
             </span>
           </button>
@@ -202,7 +260,7 @@ function VideoTile({ src, index }: { src: string; index: number }) {
           {String(index + 1).padStart(2, "0")}
         </span>
         <span className={`absolute top-3 right-3 ${label} bg-void/70 text-lime px-2 py-1`}>
-          {orientation === "portrait" ? "9:16" : orientation === "square" ? "1:1" : "16:9"}
+          {declaredRatio}
         </span>
         <button
           type="button"
@@ -221,8 +279,8 @@ function VideoTile({ src, index }: { src: string; index: number }) {
 
 export function VideosSection() {
   const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? VIDEO_URLS : VIDEO_URLS.slice(0, INITIAL_COUNT);
-  const hasMore = VIDEO_URLS.length > INITIAL_COUNT;
+  const visible = expanded ? VIDEOS : VIDEOS.slice(0, INITIAL_COUNT);
+  const hasMore = VIDEOS.length > INITIAL_COUNT;
 
   return (
     <section id="videos" className="relative bg-void text-paper py-[14vh] px-[5vw] md:px-[3vw]">
@@ -249,12 +307,11 @@ export function VideosSection() {
         </div>
 
         <motion.div
-          layout
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-auto"
         >
           <AnimatePresence mode="popLayout" initial={false}>
-            {visible.map((src, i) => (
-              <VideoTile key={src + i} src={src} index={i} />
+            {visible.map(({ src, ratio }, i) => (
+              <VideoTile key={src + i} src={src} ratio={ratio} index={i} />
             ))}
           </AnimatePresence>
         </motion.div>
@@ -266,7 +323,7 @@ export function VideosSection() {
               onClick={() => setExpanded((v) => !v)}
               className="inline-flex items-center gap-2 border border-lime text-lime px-6 py-3 font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-lime hover:text-paper transition-colors"
             >
-              {expanded ? "See less ↑" : `See more (${VIDEO_URLS.length - INITIAL_COUNT}) ↓`}
+              {expanded ? "See less ↑" : `See more (${VIDEOS.length - INITIAL_COUNT}) ↓`}
             </button>
           </div>
         )}

@@ -2,15 +2,18 @@ import portraitHero from "@/assets/heo-portait.png";
 const portraitAbout = "/__l5e/assets-v1/3546a4a6-3deb-4789-a567-2c8e56d27007/portrait-about.png";
 
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
-import { useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { HairlineGrid } from "./HairlineGrid";
 import { VideoProvider } from "./VideoManager";
 import { Marquee, BlurFade, WordRotate } from "./magic";
 import { portfolio } from "@/lib/portfolio-data";
-import { InteractiveRobotSpline } from "./ui/interactive-3d-robot";
 import { VideosSection } from "./VideosSection";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
+const InteractiveRobotSpline = lazy(() =>
+  import("./ui/interactive-3d-robot").then((mod) => ({ default: mod.InteractiveRobotSpline })),
+);
 
 /* ────── shared bits ────── */
 const display = "font-display tracking-[-0.025em]";
@@ -140,40 +143,62 @@ const tools = {
 };
 
 function About() {
+  const isMobile = useIsMobile();
+  const showRobotStage = !isMobile;
+
   return (
     <section id="about" className="relative grid grid-cols-1 md:grid-cols-2 min-h-[90vh] bg-warm">
       {/* LEFT — interactive 3D robot stage */}
-      <div className="relative bg-warm overflow-hidden min-h-[70vh] md:min-h-0 flex items-center justify-center p-6 md:p-10">
-        <div className="relative w-full h-full min-h-[60vh] md:min-h-[80vh] bg-editorial border border-paper/15 shadow-[8px_8px_0_0_var(--lime)] overflow-hidden">
-          {/* soft lime glow behind the robot */}
-          <div
-            aria-hidden
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--lime) 22%, transparent), transparent 65%)" }}
-          />
-          {/* the robot fills the stage */}
-          <div className="absolute inset-0">
-            <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="!w-full !h-full" />
+      {showRobotStage ? (
+        <div className="relative bg-warm overflow-hidden min-h-[70vh] md:min-h-0 flex items-center justify-center p-6 md:p-10">
+          <div className="relative w-full h-full min-h-[60vh] md:min-h-[80vh] bg-editorial border border-paper/15 shadow-[8px_8px_0_0_var(--lime)] overflow-hidden">
+            {/* soft lime glow behind the robot */}
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--lime) 22%, transparent), transparent 65%)" }}
+            />
+            <Suspense
+              fallback={
+                <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-charcoal">
+                  <div className="space-y-4">
+                    <svg className="mx-auto h-20 w-20 text-lime animate-pulse" viewBox="0 0 96 96" fill="none" aria-hidden>
+                      <rect x="18" y="24" width="60" height="48" rx="12" stroke="currentColor" strokeWidth="3" />
+                      <circle cx="38" cy="44" r="4" fill="currentColor" />
+                      <circle cx="58" cy="44" r="4" fill="currentColor" />
+                      <path d="M34 58c4 4 8 6 14 6s10-2 14-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                      <path d="M48 16v8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                      <circle cx="48" cy="14" r="3" fill="currentColor" />
+                    </svg>
+                    <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">loading whobee…</div>
+                  </div>
+                </div>
+              }
+            >
+              <div className="absolute inset-0">
+                <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="!w-full !h-full" />
+              </div>
+            </Suspense>
+            {/* subtle lime tint to nudge robot toward theme */}
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none mix-blend-multiply"
+              style={{ background: "color-mix(in oklab, var(--lime) 10%, transparent)" }}
+            />
+            {/* chips */}
+            <div className={`${label} text-charcoal/70 absolute top-3 left-3 z-20`}>// say hi to whobee</div>
+            <div className={`${label} text-lime absolute top-3 right-3 z-20`}>drag · click · poke</div>
+            <div className="absolute bottom-3 left-3 z-20 -rotate-2 bg-signal text-paper px-2 py-1 font-mono text-[9px] tracking-[0.18em] uppercase shadow-[3px_3px_0_0_rgba(20,24,27,0.85)]">
+              ★ studio mascot
+            </div>
+            <div className="absolute bottom-3 right-3 z-30 bg-paper text-editorial font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1">
+              live · 3d
+            </div>
+            {/* watermark cover — hides "Built with Spline" badge */}
+            <div aria-hidden className="absolute bottom-0 right-0 z-20 w-[190px] h-[52px] bg-editorial pointer-events-none" />
           </div>
-          {/* subtle lime tint to nudge robot toward theme */}
-          <div
-            aria-hidden
-            className="absolute inset-0 pointer-events-none mix-blend-multiply"
-            style={{ background: "color-mix(in oklab, var(--lime) 10%, transparent)" }}
-          />
-          {/* chips */}
-          <div className={`${label} text-charcoal/70 absolute top-3 left-3 z-20`}>// say hi to whobee</div>
-          <div className={`${label} text-lime absolute top-3 right-3 z-20`}>drag · click · poke</div>
-          <div className="absolute bottom-3 left-3 z-20 -rotate-2 bg-signal text-paper px-2 py-1 font-mono text-[9px] tracking-[0.18em] uppercase shadow-[3px_3px_0_0_rgba(20,24,27,0.85)]">
-            ★ studio mascot
-          </div>
-          <div className="absolute bottom-3 right-3 z-30 bg-paper text-editorial font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1">
-            live · 3d
-          </div>
-          {/* watermark cover — hides "Built with Spline" badge */}
-          <div aria-hidden className="absolute bottom-0 right-0 z-20 w-[190px] h-[52px] bg-editorial pointer-events-none" />
         </div>
-      </div>
+      ) : null}
 
       {/* RIGHT text */}
       <div className="relative bg-warm text-paper px-[5vw] md:px-[3vw] py-[10vh] flex flex-col justify-between">

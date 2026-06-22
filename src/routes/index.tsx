@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/Nav";
 import { Portfolio } from "@/components/Portfolio";
-import { SmoothScroll } from "@/components/SmoothScroll";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,7 +17,6 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <>
-      <SmoothScroll />
       <Nav />
       <Portfolio />
     </>
