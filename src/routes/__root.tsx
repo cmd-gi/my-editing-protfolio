@@ -11,6 +11,7 @@ import { type ReactNode } from "react";
 
 import { SmoothScroll } from "@/components/SmoothScroll";
 import portraitHero from "@/assets/heo-portait.png";
+import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 
 const fontStylesheet =
@@ -132,6 +133,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <SmoothScroll />
+      <Toaster position="bottom-right" theme="dark" richColors />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>

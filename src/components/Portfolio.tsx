@@ -260,6 +260,17 @@ function About() {
 /* ─────────────── EXPERIENCE ─────────────── */
 const experience = [
   {
+    company: "Sociofy Agency",
+    role: "Video Editor · Full-Time (5 Months)",
+    location: "Bengaluru",
+    bullets: [
+      "Worked full-time as video editor at Sociofy digital marketing agency in Bengaluru.",
+      "Cut high-converting social media ads, commercial brand films, and viral Instagram reels.",
+      "Handled end-to-end post-production: pacing, sound design, motion graphics, kinetic typography, and color grading.",
+      "Collaborated with marketing strategists and creative directors to craft high-retention video content for diverse clients.",
+    ],
+  },
+  {
     company: "Sanchi Atelier",
     role: "Video Editor & Creative Designer",
     bullets: [
@@ -318,6 +329,11 @@ function Experience() {
                   {job.company}
                 </h3>
                 <div className={`mt-2 ${label} text-ash`}>{job.role}</div>
+                {"location" in job && job.location && (
+                  <div className="mt-1 font-mono text-[10px] tracking-[0.14em] uppercase text-paper/40">
+                    {job.location}
+                  </div>
+                )}
               </div>
               <ul className="col-span-12 md:col-span-9 md:pl-10 space-y-3 text-[14px] leading-[1.65] text-paper/85">
                 {job.bullets.map((b) => (
