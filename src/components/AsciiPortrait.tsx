@@ -1,44 +1,27 @@
 import { useEffect, useRef, useCallback } from "react";
 import portraitHero from "@/assets/heo-portait.png";
 
-// Reference art character set: heavy on +, -, =, :, *, #
+// Characters matching reference artwork
 const DENSITY_CHARS = "   ..··::--==++**##%%@@";
-const SPECIAL_CHARS = ["+", "-", "=", "+", "|", "+", "*", "+", "+"];
-
-interface Gaze {
-  x: number; // -1 (look left) to +1 (look right)
-  y: number; // -1 (look up) to +1 (look down)
-  blink: number; // 0 = fully open, 1 = fully closed
-}
+const OUTLINE_CHARS = ["+", "-", "|", "=", "*", "+", "·", "+"];
 
 export function AsciiPortrait({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageLoadedRef = useRef(false);
 
-  // Gaze state
-  const gazeRef = useRef<Gaze>({ x: 0, y: 0, blink: 0 });
-  const targetGazeRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const lastMouseMoveRef = useRef<number>(Date.now());
-  const animFrameRef = useRef<number | null>(null);
-
-  // Cached image pixel luminance grid
+  // Cached image data & edge maps
   const imgDataRef = useRef<{
     width: number;
     height: number;
     luminance: Float32Array;
-    colors: Uint8Array;
+    isEdge: Uint8Array;
+    isSilhouette: Uint8Array;
   } | null>(null);
 
-  // Eye normalized positions on the portrait
-  // Left eye (viewer's left): x ~ 0.40, y ~ 0.30
-  // Right eye (viewer's right): x ~ 0.59, y ~ 0.32
-  const eyeCoords = useRef({
-    left: { x: 0.40, y: 0.30, radiusX: 0.045, radiusY: 0.03 },
-    right: { x: 0.59, y: 0.32, radiusX: 0.045, radiusY: 0.03 },
-  });
+  const animFrameRef = useRef<number | null>(null);
+  const mousePosRef = useRef<{ x: number; y: number }>({ x: 0.5, y: 0.5 });
 
-  // Load and pre-process portrait into luminance map
+  // Load and pre-process portrait into luminance & edge contour maps
   useEffect(() => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -58,48 +41,74 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
       const pixels = raw.data;
 
       const luminance = new Float32Array(COLS * ROWS);
-      const colors = new Uint8Array(COLS * ROWS * 3);
+      const isEdge = new Uint8Array(COLS * ROWS);
+      const isSilhouette = new Uint8Array(COLS * ROWS);
 
       for (let i = 0; i < COLS * ROWS; i++) {
         const r = pixels[i * 4];
         const g = pixels[i * 4 + 1];
         const b = pixels[i * 4 + 2];
         const a = pixels[i * 4 + 3] / 255;
+        luminance[i] = (0.299 * r + 0.587 * g + 0.114 * b) * a;
+      }
 
-        // Perceptual brightness
-        const lum = (0.299 * r + 0.587 * g + 0.114 * b) * a;
-        luminance[i] = lum;
-        colors[i * 3] = r;
-        colors[i * 3 + 1] = g;
-        colors[i * 3 + 2] = b;
+      const getLum = (row: number, col: number) => {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return 0;
+        return luminance[row * COLS + col];
+      };
+
+      // Detect outline & silhouette perimeter
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const idx = r * COLS + c;
+          const lum = luminance[idx];
+
+          if (lum > 22) {
+            // Check if boundary neighbor is dark
+            const isBoundary =
+              getLum(r - 1, c) < 22 ||
+              getLum(r + 1, c) < 22 ||
+              getLum(r, c - 1) < 22 ||
+              getLum(r, c + 1) < 22;
+
+            if (isBoundary) {
+              isSilhouette[idx] = 1;
+            }
+
+            // Sobel edge gradient for internal structural contours
+            const gx =
+              getLum(r - 1, c + 1) + 2 * getLum(r, c + 1) + getLum(r + 1, c + 1) -
+              (getLum(r - 1, c - 1) + 2 * getLum(r, c - 1) + getLum(r + 1, c - 1));
+            const gy =
+              getLum(r + 1, c - 1) + 2 * getLum(r + 1, c) + getLum(r + 1, c + 1) -
+              (getLum(r - 1, c - 1) + 2 * getLum(r - 1, c) + getLum(r - 1, c + 1));
+            const grad = Math.sqrt(gx * gx + gy * gy);
+
+            if (grad > 90) {
+              isEdge[idx] = 1;
+            }
+          }
+        }
       }
 
       imgDataRef.current = {
         width: COLS,
         height: ROWS,
         luminance,
-        colors,
+        isEdge,
+        isSilhouette,
       };
-      imageLoadedRef.current = true;
     };
   }, []);
 
-  // Mouse / Pointer move for interactive eye tracking
+  // Track cursor position for subtle aura light direction
   const handlePointerMove = useCallback((e: MouseEvent | PointerEvent) => {
-    lastMouseMoveRef.current = Date.now();
     const container = containerRef.current;
     if (!container) return;
-
     const rect = container.getBoundingClientRect();
-    const eyeCenterX = rect.left + rect.width * 0.5;
-    const eyeCenterY = rect.top + rect.height * 0.31;
-
-    const dx = (e.clientX - eyeCenterX) / (window.innerWidth * 0.4);
-    const dy = (e.clientY - eyeCenterY) / (window.innerHeight * 0.4);
-
-    targetGazeRef.current = {
-      x: Math.max(-1, Math.min(1, dx)),
-      y: Math.max(-1, Math.min(1, dy)),
+    mousePosRef.current = {
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
     };
   }, []);
 
@@ -115,11 +124,6 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let startTime = performance.now();
-    let nextBlinkTime = startTime + 2500;
-    let isBlinking = false;
-    let blinkStartTime = 0;
-
     const render = (now: number) => {
       const data = imgDataRef.current;
       if (!data) {
@@ -127,46 +131,6 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
         return;
       }
 
-      // Handle idle loop when mouse hasn't moved for 2 seconds
-      const isIdle = Date.now() - lastMouseMoveRef.current > 2000;
-      if (isIdle) {
-        const timeSec = now * 0.001;
-        const glancePhase = Math.sin(timeSec * 0.8);
-
-        if (glancePhase > 0.85) {
-          targetGazeRef.current = { x: -0.6, y: -0.1 };
-        } else if (glancePhase < -0.85) {
-          targetGazeRef.current = { x: 0.6, y: -0.1 };
-        } else {
-          targetGazeRef.current = {
-            x: Math.sin(timeSec * 0.5) * 0.15,
-            y: Math.cos(timeSec * 0.4) * 0.1,
-          };
-        }
-      }
-
-      // Smooth interpolation toward target gaze
-      const currentGaze = gazeRef.current;
-      currentGaze.x += (targetGazeRef.current.x - currentGaze.x) * 0.1;
-      currentGaze.y += (targetGazeRef.current.y - currentGaze.y) * 0.1;
-
-      // Natural blink cycle
-      if (!isBlinking && now > nextBlinkTime) {
-        isBlinking = true;
-        blinkStartTime = now;
-      }
-      if (isBlinking) {
-        const blinkProgress = (now - blinkStartTime) / 160;
-        if (blinkProgress >= 1) {
-          isBlinking = false;
-          currentGaze.blink = 0;
-          nextBlinkTime = now + 2800 + Math.random() * 3200;
-        } else {
-          currentGaze.blink = Math.sin(blinkProgress * Math.PI);
-        }
-      }
-
-      // High DPI canvas scaling
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const displayWidth = canvas.clientWidth;
       const displayHeight = canvas.clientHeight;
@@ -179,28 +143,34 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
       ctx.save();
       ctx.scale(dpr, dpr);
 
-      // Deep rich background
+      // Deep dark background
       ctx.fillStyle = "#120F10";
       ctx.fillRect(0, 0, displayWidth, displayHeight);
 
-      // Radiant Aura (matching reference poster's glowing halo)
+      const time = now * 0.001;
+
+      // Radiant Aura (pulsing behind the body silhouette)
+      const auraBreath = Math.sin(time * 1.5) * 0.04;
+      const auraCenterX = displayWidth * (0.52 + (mousePosRef.current.x - 0.5) * 0.06);
+      const auraCenterY = displayHeight * (0.36 + (mousePosRef.current.y - 0.5) * 0.06);
+
       const auraGradient = ctx.createRadialGradient(
-        displayWidth * 0.52,
-        displayHeight * 0.36,
-        20,
-        displayWidth * 0.52,
-        displayHeight * 0.38,
-        displayWidth * 0.52
+        auraCenterX,
+        auraCenterY,
+        25,
+        auraCenterX,
+        auraCenterY,
+        displayWidth * (0.5 + auraBreath)
       );
       auraGradient.addColorStop(0, "rgba(206, 255, 0, 0.32)");
-      auraGradient.addColorStop(0.38, "rgba(206, 255, 0, 0.14)");
-      auraGradient.addColorStop(0.7, "rgba(0, 57, 255, 0.08)");
+      auraGradient.addColorStop(0.35, "rgba(206, 255, 0, 0.14)");
+      auraGradient.addColorStop(0.65, "rgba(0, 57, 255, 0.08)");
       auraGradient.addColorStop(1, "rgba(18, 15, 16, 0)");
 
       ctx.fillStyle = auraGradient;
       ctx.fillRect(0, 0, displayWidth, displayHeight);
 
-      // Calculate cell dimensions
+      // Cell dimensions
       const cellW = displayWidth / data.width;
       const cellH = displayHeight / data.height;
       const fontSize = Math.max(8, Math.floor(cellH * 1.05));
@@ -208,81 +178,54 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      // Draw ASCII grid
+      // Render ASCII glyphs
       for (let r = 0; r < data.height; r++) {
-        const ny = r / data.height;
-
         for (let c = 0; c < data.width; c++) {
-          const nx = c / data.width;
           const idx = r * data.width + c;
-          let lum = data.luminance[idx];
+          const lum = data.luminance[idx];
 
           if (lum < 10) continue;
 
-          // Check if inside Left Eye
-          const dLeftX = (nx - eyeCoords.current.left.x) / eyeCoords.current.left.radiusX;
-          const dLeftY = (ny - eyeCoords.current.left.y) / eyeCoords.current.left.radiusY;
-          const distLeft = dLeftX * dLeftX + dLeftY * dLeftY;
+          const isSil = data.isSilhouette[idx] === 1;
+          const isEdg = data.isEdge[idx] === 1;
 
-          // Check if inside Right Eye
-          const dRightX = (nx - eyeCoords.current.right.x) / eyeCoords.current.right.radiusX;
-          const dRightY = (ny - eyeCoords.current.right.y) / eyeCoords.current.right.radiusY;
-          const distRight = dRightX * dRightX + dRightY * dRightY;
-
-          let isEyeRegion = false;
-          let isPupil = false;
-
-          // Left Eye
-          if (distLeft < 1.1) {
-            isEyeRegion = true;
-            if (Math.abs(dLeftY) > 1 - currentGaze.blink * 1.1) {
-              lum = 40;
-            } else {
-              const pupilDx = dLeftX - currentGaze.x * 0.45;
-              const pupilDy = dLeftY - currentGaze.y * 0.4;
-              if (pupilDx * pupilDx + pupilDy * pupilDy < 0.28) {
-                isPupil = true;
-              }
-            }
-          }
-
-          // Right Eye
-          if (distRight < 1.1) {
-            isEyeRegion = true;
-            if (Math.abs(dRightY) > 1 - currentGaze.blink * 1.1) {
-              lum = 40;
-            } else {
-              const pupilDx = dRightX - currentGaze.x * 0.45;
-              const pupilDy = dRightY - currentGaze.y * 0.4;
-              if (pupilDx * pupilDx + pupilDy * pupilDy < 0.28) {
-                isPupil = true;
-              }
-            }
-          }
-
-          // Character & Color Selection
           let ch = " ";
           let color = "#FFF7EC";
 
-          if (isPupil) {
-            // Intense glowing pupil tracking viewer
-            ch = "+";
-            color = "#CEFF00";
-          } else if (isEyeRegion && lum > 40) {
-            ch = ":";
-            color = "#FFFFFF";
+          // ANIMATE THE BODY OUTLINE & SILHOUETTE PERIMETER
+          if (isSil) {
+            // Flowing beam animation traveling continuously along the silhouette
+            const wave = Math.sin(time * 3.5 + (r + c) * 0.22);
+            const outlineCharIdx = Math.floor(
+              (time * 5 + r * 0.4 + c * 0.3) % OUTLINE_CHARS.length
+            );
+            ch = OUTLINE_CHARS[Math.abs(outlineCharIdx)];
+
+            // Electric lime glow and pulse along the perimeter
+            if (wave > 0.4) {
+              color = "#CEFF00"; // Glowing Lime pulse
+            } else if (wave > -0.2) {
+              color = "#BEEBFD"; // Sky Blue shimmer
+            } else {
+              color = "#FFFFFF"; // Crisp white
+            }
+          } else if (isEdg && lum > 60) {
+            // Subtle edge shimmer along structural contours (collar, shoulders)
+            const edgeWave = Math.sin(time * 2.2 + r * 0.18 - c * 0.12);
+            ch = edgeWave > 0.2 ? "+" : "-";
+            color = edgeWave > 0.5 ? "#CEFF00" : "rgba(255, 247, 236, 0.85)";
           } else {
+            // NATURAL, FAITHFUL FACE & BODY INTERIOR (no artificial eye distortion)
             const normalizedLum = Math.min(1, Math.max(0, lum / 255));
             const charIdx = Math.floor(normalizedLum * (DENSITY_CHARS.length - 1));
             ch = DENSITY_CHARS[charIdx];
 
-            if (normalizedLum > 0.65) {
-              ch = SPECIAL_CHARS[(c + r) % SPECIAL_CHARS.length];
-              color = normalizedLum > 0.85 ? "#CEFF00" : "#FFF7EC";
+            if (normalizedLum > 0.72) {
+              color = "#FFF7EC"; // Bright highlights
             } else if (normalizedLum > 0.4) {
-              color = "#F0E8D8";
+              color = "#F0E8D8"; // Midtones
             } else {
-              color = "rgba(255, 247, 236, 0.45)";
+              color = "rgba(255, 247, 236, 0.45)"; // Shadows & contours
             }
           }
 
