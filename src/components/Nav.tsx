@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { ArrowIcon } from "./daren-curtis/ArrowIcon";
 
 const links = [
-  { label: "ABOUT", href: "#about" },
-  { label: "EXPERIENCE", href: "#experience" },
-  { label: "PORTFOLIO", href: "#videos" },
-  { label: "CONTACT", href: "#contact" },
+  { label: "About", href: "#about" },
+  { label: "Videos", href: "#videos" },
+  { label: "Experience", href: "#experience" },
+  { label: "Posters", href: "#portfolio" },
+  { label: "Contact", href: "#contact" },
 ];
 
 export function Nav() {
@@ -12,7 +14,7 @@ export function Nav() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -31,87 +33,102 @@ export function Nav() {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 h-16 md:h-20 flex items-center justify-between px-[5vw] md:px-[3vw] transition-colors duration-300 ${
-          open
-            ? "bg-void"
-            : scrolled
-              ? "bg-void/85 backdrop-blur-md"
-              : "bg-transparent"
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3 md:py-4 px-4 sm:px-6 lg:px-12 ${
+          scrolled ? "backdrop-blur-md bg-[#FFF7EC]/90 shadow-[0_4px_20px_rgba(21,16,16,0.06)]" : "bg-transparent"
         }`}
       >
-        <a
-          href="#top"
-          onClick={() => setOpen(false)}
-          className="font-display font-bold text-[14px] md:text-[15px] tracking-tight text-paper hover:text-lime transition-colors"
-        >
-          CHARAN
-        </a>
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+          {/* Logo Badge (Daren & Curtis style pill) */}
+          <a
+            href="#top"
+            onClick={() => setOpen(false)}
+            className="group flex items-center gap-2.5 px-3 py-1.5 rounded-lg border-2 border-[#151010] bg-white transition-all hover:bg-[#CEFF00] hover:shadow-[2px_2px_0px_#151010]"
+          >
+            <span className="font-extrabold text-[15px] tracking-tight text-[#151010] uppercase">
+              Charan
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0039FF] animate-pulse" />
+            <span className="text-[10px] font-mono tracking-wider font-semibold text-[#151010]/70 uppercase">
+              Editor
+            </span>
+          </a>
 
-        <ul className="hidden md:flex items-center gap-0">
-          {links.map((l, i) => (
-            <li key={l.label} className="flex items-center">
+          {/* Nav Links */}
+          <nav className="hidden md:flex items-center gap-1 bg-white/80 border border-[#151010]/10 rounded-full px-5 py-2 shadow-xs backdrop-blur-sm">
+            {links.map((l) => (
               <a
+                key={l.label}
                 href={l.href}
-                className="relative font-mono text-[12px] tracking-[0.05em] font-medium text-paper hover:text-lime transition-colors duration-200 px-3 py-2 group"
+                className="px-4 py-1.5 rounded-full text-[14px] font-semibold text-[#151010] hover:text-[#0039FF] hover:bg-[#BEEBFD]/50 transition-all"
               >
                 {l.label}
-                <span className="absolute left-1/2 bottom-1 h-px w-[60%] -translate-x-1/2 bg-lime scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
               </a>
-              {i < links.length - 1 && <span className="text-ash">·</span>}
-            </li>
-          ))}
-        </ul>
-
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="md:hidden font-mono text-[12px] tracking-[0.1em] font-medium text-paper border border-paper/30 px-3 py-1.5 hover:text-lime hover:border-lime transition-colors"
-          aria-label="Toggle menu"
-          aria-expanded={open}
-        >
-          {open ? "CLOSE" : "MENU"}
-        </button>
-      </nav>
-
-      {/* Mobile menu overlay — outside nav for clean stacking */}
-      <div
-        className={`md:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-void transition-opacity duration-300 ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        aria-hidden={!open}
-      >
-        <div className="relative h-full flex flex-col px-[5vw] pt-6 pb-8 overflow-y-auto">
-          <div className="font-mono text-[10px] tracking-[0.15em] uppercase text-ash pb-4 border-b border-paper/10">
-            // Navigate
-          </div>
-          <ul className="flex flex-col">
-            {links.map((l, i) => (
-              <li key={l.label} className="w-full border-b border-paper/10">
-                <a
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-baseline gap-4 font-display font-extrabold uppercase tracking-[-0.02em] text-[clamp(1.75rem,9vw,2.5rem)] text-paper hover:text-lime transition-colors py-5"
-                >
-                  <span className="font-mono text-[10px] tracking-[0.15em] text-lime font-medium">
-                    0{i + 1}
-                  </span>
-                  <span>{l.label}</span>
-                </a>
-              </li>
             ))}
-          </ul>
+          </nav>
 
-          <div className="mt-auto pt-8 flex flex-col gap-2 font-mono text-[11px] tracking-[0.05em] uppercase text-ash">
+          {/* Right CTA Button & Mobile Trigger */}
+          <div className="flex items-center gap-3">
             <a
-              href="mailto:32charan@gmail.com"
-              onClick={() => setOpen(false)}
-              className="text-paper hover:text-lime transition-colors break-all"
+              href="#contact"
+              className="group hidden sm:inline-flex items-center gap-2.5 bg-[#CEFF00] hover:bg-[#d8ff26] text-[#151010] border-2 border-[#151010] px-5 py-2.5 rounded-[12px] text-[14px] font-extrabold transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#151010]"
             >
-              32charan@gmail.com
+              <span>Let's Talk</span>
+              <ArrowIcon className="w-3.5 h-3.5" />
             </a>
-            <span>// 2026 — CHARAN</span>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setOpen((o) => !o)}
+              className="md:hidden flex items-center justify-center w-11 h-11 rounded-[10px] border-2 border-[#151010] bg-[#CEFF00] text-[#151010] transition-colors"
+              aria-label="Toggle menu"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                {open ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="4" y1="8" x2="20" y2="8" />
+                    <line x1="4" y1="16" x2="20" y2="16" />
+                  </>
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+      </header>
+
+      {/* Mobile Drawer */}
+      <div
+        className={`md:hidden fixed inset-0 z-40 bg-[#FFF7EC] transition-all duration-300 pt-24 px-6 flex flex-col justify-between pb-10 ${
+          open ? "opacity-100 pointer-events-auto translate-y-0" : "opacity-0 pointer-events-none -translate-y-4"
+        }`}
+      >
+        <div className="flex flex-col gap-2">
+          {links.map((l, i) => (
+            <a
+              key={l.label}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-between py-4 border-b border-[#151010]/10 text-2xl font-black text-[#0039FF] hover:text-[#151010]"
+            >
+              <span>{l.label}</span>
+              <span className="text-xs font-mono text-[#151010]/40">0{i + 1}</span>
+            </a>
+          ))}
+        </div>
+
+        <a
+          href="#contact"
+          onClick={() => setOpen(false)}
+          className="w-full flex items-center justify-center gap-2 bg-[#CEFF00] border-2 border-[#151010] text-[#151010] py-4 rounded-[14px] text-lg font-black shadow-[4px_4px_0px_#151010]"
+        >
+          <span>Get in Touch</span>
+          <ArrowIcon className="w-4 h-4" />
+        </a>
       </div>
     </>
   );

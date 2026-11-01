@@ -1,145 +1,193 @@
 import portraitHero from "@/assets/heo-portait.png";
-const portraitAbout = "/__l5e/assets-v1/3546a4a6-3deb-4789-a567-2c8e56d27007/portrait-about.png";
-
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
 import { lazy, Suspense, useRef, useState } from "react";
-import { HairlineGrid } from "./HairlineGrid";
 import { VideoProvider } from "./VideoManager";
-import { Marquee, BlurFade, WordRotate } from "./magic";
+import { Marquee, BlurFade } from "./magic";
 import { portfolio } from "@/lib/portfolio-data";
 import { VideosSection } from "./VideosSection";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DecorationStar } from "./daren-curtis/DecorationStar";
+import { ArrowIcon } from "./daren-curtis/ArrowIcon";
 
 const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
 const InteractiveRobotSpline = lazy(() =>
   import("./ui/interactive-3d-robot").then((mod) => ({ default: mod.InteractiveRobotSpline })),
 );
 
-/* ────── shared bits ────── */
-const display = "font-display tracking-[-0.025em]";
-const label = "font-mono text-[10px] tracking-[0.18em] uppercase";
-
-function PhaseMark({ n, label: l }: { n: string; label: string }) {
+function PhaseBadge({ n, label }: { n: string; label: string }) {
   return (
-    <div className="font-mono text-[11px] tracking-[0.18em] uppercase text-ash flex items-center gap-2">
-      <span className="inline-block w-1.5 h-1.5 rounded-full bg-lime animate-pulse" />
-      <span className="text-lime">{n}</span>
-      <span className="text-paper/30">/</span>
-      <span>{l}</span>
+    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#151010]/20 bg-white text-[12px] font-mono uppercase tracking-wider text-[#0039FF] font-bold shadow-xs">
+      <span className="w-2 h-2 rounded-full bg-[#0039FF] animate-pulse" />
+      <span>{n}</span>
+      <span className="text-[#151010]/30">/</span>
+      <span>{label}</span>
     </div>
   );
 }
 
-/* ─────────────── HERO ─────────────── */
+/* ─────────────── HERO (DAREN & CURTIS BANNER BIG STYLE) ─────────────── */
 function Hero() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const textY = useTransform(scrollYProgress, [0, 1], [0, -120]);
-  const imgY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const imgScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const imgY = useTransform(scrollYProgress, [0, 1], [0, 60]);
 
   return (
-    <section id="top" ref={ref} className="relative min-h-screen w-full bg-void overflow-hidden pt-20 md:pt-24">
-      <HairlineGrid />
-      <div className="relative z-20 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-6 px-[5vw] md:px-[3vw] pb-12 md:pb-16 md:min-h-[calc(100vh-6rem)]">
-        <div className="md:hidden pt-1">
-          <PhaseMark n="001" label="Reel / 2026" />
-        </div>
+    <section id="top" ref={ref} className="relative min-h-screen w-full bg-[#FFF7EC] text-[#151010] overflow-hidden pt-24 md:pt-32 pb-16 px-4 sm:px-6 lg:px-12 flex flex-col justify-between">
+      {/* Decorative Star */}
+      <div className="absolute top-28 right-8 md:right-24 hidden sm:block pointer-events-none z-10">
+        <DecorationStar className="w-16 h-14 md:w-20 md:h-16 animate-dc-float" fill="#CEFF00" stroke="#151010" />
+      </div>
 
-        {/* Portrait */}
-        <motion.div
-          style={{ y: imgY, scale: imgScale }}
-          className="order-1 md:order-2 md:col-span-5 relative h-[48vh] sm:h-[54vh] md:h-auto md:min-h-[80vh] -mx-[5vw] md:mx-0"
-        >
-          <div className="absolute inset-0 overflow-hidden">
-            <img
-              src={portraitHero}
-              alt="Charan — Video Editor & Colorist"
-              className="w-full h-full object-cover object-top grayscale contrast-125"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-void via-void/40 to-transparent md:hidden" />
-          </div>
-          {/* Play badge */}
-          <a
-            href="#portfolio"
-            className="hidden md:flex absolute bottom-6 right-6 items-center gap-3 group"
-            aria-label="View showreel"
-          >
-            <span className="w-14 h-14 rounded-full border border-paper/60 flex items-center justify-center bg-void/40 backdrop-blur-sm transition-transform group-hover:scale-105">
-              <span className="block w-0 h-0 border-y-[7px] border-y-transparent border-l-[11px] border-l-paper ml-1" />
-            </span>
-            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-paper">
-              View<br />Showreel
-            </span>
-          </a>
-        </motion.div>
+      <div className="max-w-[1600px] mx-auto w-full relative z-20 my-auto">
+        <div className="grid grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left Text */}
+          <motion.div style={{ y: textY }} className="col-span-12 lg:col-span-7 flex flex-col justify-center">
+            <div className="mb-6">
+              <PhaseBadge n="001" label="Reel / 2026" />
+            </div>
 
-        {/* Text */}
-        <motion.div style={{ y: textY }} className="order-2 md:order-1 md:col-span-7 flex flex-col justify-between gap-5 md:gap-0 -mt-3 md:mt-0">
-          <div className="hidden md:flex flex-col gap-2 pt-2">
-            <PhaseMark n="001" label="Reel / 2026" />
-          </div>
-
-          <div className="leading-none md:-ml-1 md:mt-0">
-            <h1 className={`${display} font-black leading-[0.82] text-[clamp(4rem,16vw,15rem)] lowercase`}>
-              <span className="block text-paper">cut.</span>
-              <span className="block text-paper md:pl-[6vw]">color.</span>
-              <span className="block text-lime italic">create<span className="text-signal">.</span></span>
-            </h1>
-            <div className="mt-4 flex items-center gap-3 flex-wrap">
-              <span className="-rotate-2 bg-signal text-paper px-3 py-1 font-mono text-[10px] tracking-[0.15em] uppercase shadow-[3px_3px_0_0_rgba(0,0,0,0.35)]">
-                ★ open for fun briefs
+            <h1 className="text-[clamp(3.2rem,8.5vw,7.5rem)] font-black leading-[0.92] tracking-[-0.03em] text-[#0039FF] uppercase">
+              Video <span className="text-[#151010]">Editing</span><br />
+              <span className="text-[#151010] inline-flex items-center gap-3">
+                &amp; Motion
+                <span className="text-3xl sm:text-4xl">✺</span>
               </span>
-              <span className="font-mono text-[11px] tracking-[0.18em] uppercase text-ash inline-flex items-center gap-2">
-                making&nbsp;
-                <span className="relative inline-block min-w-[9ch] h-[1.1em] text-lime font-semibold">
-                  <WordRotate words={["brand films.", "scroll-stopping reels.", "AI experiments.", "color magic.", "motion that slaps."]} />
-                </span>
+            </h1>
+
+            <div className="mt-4 flex items-center gap-3 flex-wrap">
+              <span className="inline-block bg-[#CEFF00] border-2 border-[#151010] text-[#151010] px-3.5 py-1 rounded-[10px] text-[12px] font-extrabold uppercase tracking-wide shadow-[3px_3px_0px_#151010]">
+                ★ Open for New Briefs
+              </span>
+              <span className="text-[15px] font-semibold text-[#151010]/80">
+                with Real Storytelling &amp; Cinematic Results
               </span>
             </div>
-          </div>
 
-          <div className="md:mt-12 flex flex-col gap-5 max-w-[52ch]">
-            <p className="text-[13px] md:text-[15px] leading-[1.65] text-ash">
-              Hi, I'm Charan — I make videos look <span className="text-lime font-semibold">tasty</span>, color them
-              like it's a Sunday afternoon, and sneak in a little motion magic. Brand films, reels, AI experiments —
-              if it moves on a screen, I probably want to play with it.
+            <p className="mt-6 text-[16px] md:text-[18px] leading-[1.65] text-[#151010]/80 max-w-[54ch] font-medium">
+              Hi, I'm Charan — Video Editor, Colorist, and Motion Designer based in Bengaluru. Crafting commercial brand films, viral reels, and high-retention social content that converts.
             </p>
-            <div className="h-px w-full bg-paper/15" />
-            <ul className="font-mono text-[10px] tracking-[0.18em] uppercase text-paper/70 space-y-1.5 mt-2">
-              <li>→ Video Editor (the obsessive kind)</li>
-              <li>→ Colorist · teal &amp; orange enthusiast</li>
-              <li>→ Motion Graphics · keyframe whisperer</li>
-              <li>→ AI Creative · prompt &amp; pray believer</li>
-            </ul>
-          </div>
-        </motion.div>
-      </div>
 
-      <div className="absolute bottom-6 right-[3vw] z-20 font-mono text-[10px] tracking-[0.2em] uppercase text-ash">
-        Scroll ↓
+            {/* Daren & Curtis style CTA buttons */}
+            <div className="mt-8 flex items-center gap-4 flex-wrap">
+              <a
+                href="#videos"
+                className="group inline-flex items-center gap-3 bg-[#CEFF00] hover:bg-[#d8ff26] text-[#151010] border-2 border-[#151010] px-7 py-4 rounded-[14px] text-[15px] font-extrabold tracking-wide uppercase transition-all shadow-[4px_4px_0px_#151010] hover:-translate-y-0.5 cursor-pointer"
+              >
+                <span>Explore Works</span>
+                <ArrowIcon className="w-4 h-4" />
+              </a>
+
+              <a
+                href="#contact"
+                className="inline-flex items-center gap-2 bg-white hover:bg-[#BEEBFD] text-[#151010] border-2 border-[#151010] px-6 py-4 rounded-[14px] text-[15px] font-extrabold tracking-wide uppercase transition-all shadow-[3px_3px_0px_#151010] hover:-translate-y-0.5 cursor-pointer"
+              >
+                <span>Get in Touch</span>
+              </a>
+            </div>
+
+            {/* Quick highlight pills */}
+            <div className="mt-10 pt-6 border-t border-[#151010]/15 flex items-center gap-6 flex-wrap text-xs font-mono font-bold text-[#151010]/70">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#0039FF]" />
+                Commercial &amp; Brand Ads
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#CEFF00]" />
+                Short-Form Reels
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#0039FF]" />
+                Color Grading &amp; VFX
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Right Portrait (Daren & Curtis Framed Card) */}
+          <motion.div
+            style={{ y: imgY }}
+            className="col-span-12 lg:col-span-5 relative flex justify-center"
+          >
+            <div className="relative w-full max-w-[460px] aspect-[4/5] rounded-[28px] border-3 border-[#151010] overflow-hidden bg-white shadow-[8px_8px_0px_#151010]">
+              <img
+                src={portraitHero}
+                alt="Charan — Video Editor & Colorist"
+                className="w-full h-full object-cover object-top grayscale contrast-125"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#151010]/40 via-transparent to-transparent pointer-events-none" />
+
+              {/* Floating Badge */}
+              <div className="absolute bottom-5 left-5 right-5 bg-white/95 backdrop-blur-sm border-2 border-[#151010] rounded-[16px] p-3.5 flex items-center justify-between shadow-[3px_3px_0px_#151010]">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#0039FF] font-bold block">
+                    Lead Editor
+                  </span>
+                  <span className="text-[14px] font-black text-[#151010]">
+                    Charan · Bengaluru
+                  </span>
+                </div>
+                <a
+                  href="#videos"
+                  className="w-9 h-9 rounded-full bg-[#CEFF00] border border-[#151010] flex items-center justify-center hover:scale-110 transition-transform"
+                  aria-label="View Reel"
+                >
+                  <ArrowIcon className="w-3.5 h-3.5 text-[#151010]" />
+                </a>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
+  );
+}
+
+/* ─────────────── MARQUEE TICKER (D&C LIGHT-BLUE / BLUE STRIPE) ─────────────── */
+function CreditsTicker() {
+  const credits = [
+    "DaVinci Resolve",
+    "Adobe After Effects",
+    "Premiere Pro",
+    "Color Grading",
+    "High-Retention Reels",
+    "Motion Graphics",
+    "Brand Storytelling",
+    "Sound Design",
+    "Photoshop & Lightroom",
+    "AI Creative Tools",
+  ];
+  return (
+    <div className="relative bg-[#BEEBFD] text-[#151010] border-y-2 border-[#151010] overflow-hidden py-3">
+      <Marquee speed={36} className="py-2">
+        {credits.map((c) => (
+          <span
+            key={c}
+            className="inline-flex items-center gap-5 font-black uppercase text-[clamp(1.25rem,2.5vw,2rem)] tracking-tight mx-4 select-none"
+          >
+            {c}
+            <span className="text-[#0039FF] text-2xl font-normal">✺</span>
+          </span>
+        ))}
+      </Marquee>
+    </div>
   );
 }
 
 /* ─────────────── ABOUT ─────────────── */
 const expertise = [
   "Cinematic Video Editing",
-  "Promotional Video Production",
-  "Color Grading & Correction",
-  "Motion Graphics",
-  "Speed Ramping",
-  "Short-Form Content Editing",
-  "Photo Editing & Retouching",
-  "Visual Storytelling",
-  "Social Media Content Creation",
-  "AI-Assisted Content Creation",
+  "Promotional Commercial Ads",
+  "Professional Color Grading",
+  "Motion Graphics & Titles",
+  "High-Converting Short Form",
+  "Speed Ramping & Sound Design",
+  "Photo Retouching & Posters",
+  "Visual Campaign Direction",
 ];
 
 const tools = {
-  "Edit & Post": ["DaVinci Resolve", "Adobe After Effects", "Adobe Photoshop", "Adobe Lightroom", "CapCut", "Canva"],
-  "AI Generative": ["Google Flow", "Higgsfield", "Runway", "Kling", "Veo"],
+  "Edit & Post": ["DaVinci Resolve", "Adobe After Effects", "Photoshop", "Lightroom", "CapCut"],
+  "AI & Generative": ["Google Flow", "Higgsfield", "Runway", "Kling", "Veo"],
 };
 
 function About() {
@@ -147,117 +195,103 @@ function About() {
   const showRobotStage = !isMobile;
 
   return (
-    <section id="about" className="relative grid grid-cols-1 md:grid-cols-2 min-h-[90vh] bg-warm">
-      {/* LEFT — interactive 3D robot stage */}
-      {showRobotStage ? (
-        <div className="relative bg-warm overflow-hidden min-h-[70vh] md:min-h-0 flex items-center justify-center p-6 md:p-10">
-          <div className="relative w-full h-full min-h-[60vh] md:min-h-[80vh] bg-editorial border border-paper/15 shadow-[8px_8px_0_0_var(--lime)] overflow-hidden">
-            {/* soft lime glow behind the robot */}
-            <div
-              aria-hidden
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--lime) 22%, transparent), transparent 65%)" }}
-            />
-            <Suspense
-              fallback={
-                <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-charcoal">
-                  <div className="space-y-4">
-                    <svg className="mx-auto h-20 w-20 text-lime animate-pulse" viewBox="0 0 96 96" fill="none" aria-hidden>
-                      <rect x="18" y="24" width="60" height="48" rx="12" stroke="currentColor" strokeWidth="3" />
-                      <circle cx="38" cy="44" r="4" fill="currentColor" />
-                      <circle cx="58" cy="44" r="4" fill="currentColor" />
-                      <path d="M34 58c4 4 8 6 14 6s10-2 14-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                      <path d="M48 16v8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                      <circle cx="48" cy="14" r="3" fill="currentColor" />
-                    </svg>
-                    <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">loading whobee…</div>
-                  </div>
+    <section id="about" className="relative bg-[#FFF7EC] text-[#151010] py-24 md:py-32 px-4 sm:px-6 lg:px-12">
+      <div className="max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+          {/* Left Robot Stage */}
+          {showRobotStage ? (
+            <div className="lg:col-span-5 relative">
+              <div className="relative w-full h-full min-h-[500px] bg-white border-2 border-[#151010] rounded-[24px] overflow-hidden shadow-[6px_6px_0px_#151010] p-6 flex flex-col justify-between">
+                <div className="flex items-center justify-between z-20">
+                  <span className="text-[11px] font-mono font-bold uppercase text-[#0039FF] bg-[#BEEBFD] px-2.5 py-1 rounded-full border border-[#151010]/20">
+                    Interactive 3D
+                  </span>
+                  <span className="text-[11px] font-mono text-[#151010]/60">Drag · Poke · Play</span>
                 </div>
-              }
-            >
-              <div className="absolute inset-0">
-                <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="!w-full !h-full" />
+
+                <Suspense
+                  fallback={
+                    <div className="flex-1 flex items-center justify-center text-center">
+                      <div className="font-mono text-xs text-[#151010]/60">Loading Whobee 3D...</div>
+                    </div>
+                  }
+                >
+                  <div className="absolute inset-0 pt-10">
+                    <InteractiveRobotSpline scene={ROBOT_SCENE_URL} className="!w-full !h-full" />
+                  </div>
+                </Suspense>
+
+                <div className="z-20 flex items-center justify-between pt-4">
+                  <span className="bg-[#CEFF00] border border-[#151010] text-[#151010] font-extrabold text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider">
+                    ★ Studio Mascot
+                  </span>
+                </div>
+
+                {/* Cover spline badge */}
+                <div aria-hidden className="absolute bottom-0 right-0 z-20 w-[180px] h-[50px] bg-white pointer-events-none" />
               </div>
-            </Suspense>
-            {/* subtle lime tint to nudge robot toward theme */}
-            <div
-              aria-hidden
-              className="absolute inset-0 pointer-events-none mix-blend-multiply"
-              style={{ background: "color-mix(in oklab, var(--lime) 10%, transparent)" }}
-            />
-            {/* chips */}
-            <div className={`${label} text-charcoal/70 absolute top-3 left-3 z-20`}>// say hi to whobee</div>
-            <div className={`${label} text-lime absolute top-3 right-3 z-20`}>drag · click · poke</div>
-            <div className="absolute bottom-3 left-3 z-20 -rotate-2 bg-signal text-paper px-2 py-1 font-mono text-[9px] tracking-[0.18em] uppercase shadow-[3px_3px_0_0_rgba(20,24,27,0.85)]">
-              ★ studio mascot
             </div>
-            <div className="absolute bottom-3 right-3 z-30 bg-paper text-editorial font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1">
-              live · 3d
+          ) : null}
+
+          {/* Right Text */}
+          <div className={`${showRobotStage ? "lg:col-span-7" : "lg:col-span-12"} flex flex-col justify-between`}>
+            <div>
+              <PhaseBadge n="002" label="About Me" />
+
+              <BlurFade className="mt-8">
+                <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black leading-[1.0] text-[#0039FF] tracking-tight">
+                  Hey, I'm <span className="text-[#151010] underline decoration-[#CEFF00] decoration-wavy decoration-4">Charan</span> 👋
+                </h2>
+                <p className="mt-6 text-[16px] md:text-[18px] leading-[1.7] text-[#151010]/85 font-medium max-w-[56ch]">
+                  Video editor, colorist, and motion designer based in Bengaluru. Equal parts visual storyteller, pacing fanatic, and keyframe nerd. I help creators, brands, and agencies craft edits that hook audiences in the first 2 seconds and keep them glued to the finish.
+                </p>
+              </BlurFade>
+
+              {/* Expertise Pills */}
+              <div className="mt-10">
+                <h3 className="text-xs font-mono uppercase tracking-widest text-[#0039FF] font-bold mb-4">
+                  // Core Expertise
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {expertise.map((e) => (
+                    <div
+                      key={e}
+                      className="bg-white border-2 border-[#151010] rounded-[14px] p-3.5 flex items-center justify-between hover:bg-[#BEEBFD]/50 transition-colors shadow-xs"
+                    >
+                      <span className="font-bold text-[14px] text-[#151010]">{e}</span>
+                      <span className="w-6 h-6 rounded-full bg-[#CEFF00] border border-[#151010] flex items-center justify-center text-[10px] font-bold">
+                        ✓
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tools Pills */}
+              <div className="mt-10">
+                <h3 className="text-xs font-mono uppercase tracking-widest text-[#0039FF] font-bold mb-4">
+                  // Tools &amp; Software
+                </h3>
+                <div className="flex flex-wrap gap-2.5">
+                  {Object.values(tools).flat().map((t) => (
+                    <span
+                      key={t}
+                      className="bg-white border-2 border-[#151010] px-4 py-2 rounded-full text-[13px] font-bold text-[#151010] hover:bg-[#CEFF00] transition-colors shadow-xs"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-            {/* watermark cover — hides "Built with Spline" badge */}
-            <div aria-hidden className="absolute bottom-0 right-0 z-20 w-[190px] h-[52px] bg-editorial pointer-events-none" />
           </div>
         </div>
-      ) : null}
-
-      {/* RIGHT text */}
-      <div className="relative bg-warm text-paper px-[5vw] md:px-[3vw] py-[10vh] flex flex-col justify-between">
-        <div className="relative z-20 flex items-start justify-between">
-          <PhaseMark n="002" label="About" />
-          <span className={`${label} text-ash`}>02.1</span>
-        </div>
-
-        <BlurFade className="relative z-20 mt-12">
-          <h2 className={`${display} font-black leading-[0.9] text-paper text-[clamp(2.5rem,7vw,6rem)] lowercase`}>
-            hey,<br />i'm <span className="text-lime italic">charan</span> <span className="text-signal">👋</span>
-          </h2>
-          <div className="mt-4 h-[3px] w-24 bg-lime rounded-full" />
-          <p className="mt-8 text-[15px] leading-[1.7] text-ash max-w-[52ch]">
-            Video editor, colorist and motion designer based in Bengaluru. I make brand films, scroll-stopping reels and
-            slightly unhinged AI experiments. Equal parts storyteller, color nerd and keyframe goblin —
-            here to make your footage <span className="text-lime font-semibold">actually slap</span>.
-          </p>
-        </BlurFade>
-
-
-        {/* Expertise grid */}
-        <div className="relative z-20 mt-14">
-          <div className={`${label} text-ash mb-5`}>Expertise</div>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 text-[13px] text-paper">
-            {expertise.map((e) => (
-              <li key={e} className="flex items-baseline gap-3">
-                <span className="text-lime text-[11px]">▶</span>
-                <span>{e}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Tools */}
-        <div className="relative z-20 mt-14 grid grid-cols-1 sm:grid-cols-2 gap-10">
-          {Object.entries(tools).map(([group, list]) => (
-            <div key={group}>
-              <div className={`${label} text-ash mb-4`}>{group}</div>
-              <div className="flex flex-wrap gap-2">
-                {list.map((t) => (
-                  <span
-                    key={t}
-                    className="border border-paper/15 hover:border-lime hover:text-lime transition-colors px-3 py-2 text-[11px] tracking-wide text-paper/90"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
       </div>
     </section>
   );
 }
 
-/* ─────────────── EXPERIENCE ─────────────── */
+/* ─────────────── EXPERIENCE (DAREN & CURTIS CONTRASTING BLUE SECTION WITH WAVES) ─────────────── */
 const experience = [
   {
     company: "Sociofy Agency",
@@ -273,6 +307,7 @@ const experience = [
   {
     company: "Sanchi Atelier",
     role: "Video Editor & Creative Designer",
+    location: "Bengaluru",
     bullets: [
       "Edited promotional videos and brand content for digital platforms.",
       "Created cinematic edits with professional color grading.",
@@ -285,6 +320,7 @@ const experience = [
   {
     company: "Freelance & College Projects",
     role: "Video Editor",
+    location: "Bengaluru",
     bullets: [
       "Edited promos, event highlights, reels, and short videos.",
       "Managed post-production from edit to delivery.",
@@ -298,88 +334,80 @@ const experience = [
 
 function Experience() {
   return (
-    <section id="experience" className="relative bg-void py-[14vh] px-[5vw] md:px-[3vw]">
-      <HairlineGrid />
-      <div className="relative z-20">
-        <div className="grid grid-cols-12 gap-6 mb-16">
-          <div className="col-span-12 md:col-span-2">
-            <PhaseMark n="004" label="Experience" />
-          </div>
-          <div className="col-span-12 md:col-span-10">
-            <h2 className={`${display} font-black leading-[0.9] text-[clamp(2.5rem,8vw,8rem)] text-paper lowercase`}>
-              places that <span className="text-lime italic">trusted</span><br />
-              me with the <span className="text-signal">scissors</span>.
+    <section id="experience" className="relative bg-[#0039FF] text-white py-28 md:py-36 px-4 sm:px-6 lg:px-12 overflow-hidden">
+      {/* Animated Wave Top Divider */}
+      <div className="wave-top-blue" />
+
+      <div className="max-w-[1600px] mx-auto relative z-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/30 bg-white/10 text-[12px] font-mono uppercase tracking-wider text-[#CEFF00] font-bold mb-4">
+              <span className="w-2 h-2 rounded-full bg-[#CEFF00] animate-pulse" />
+              <span>004 / Track Record</span>
+            </div>
+            <h2 className="text-[clamp(2.75rem,7vw,6.5rem)] font-black leading-[0.95] text-white tracking-tight">
+              Places That <span className="text-[#CEFF00]">Trusted</span><br />
+              Me With The <span className="underline decoration-[#CEFF00] decoration-wavy decoration-4">Scissors</span>.
             </h2>
           </div>
+          <p className="text-white/80 font-medium text-[16px] max-w-[42ch]">
+            From agency fast-turnaround performance reels to brand films and creative direction.
+          </p>
         </div>
 
-        <div className="space-y-px bg-paper/10">
+        {/* Experience Cards (Daren & Curtis Service List style) */}
+        <div className="space-y-6">
           {experience.map((job, i) => (
-            <motion.article
+            <motion.div
               key={job.company}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.6, delay: i * 0.05 }}
-              className="bg-void grid grid-cols-12 gap-6 py-10 md:py-14 group"
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              className="bg-white text-[#151010] border-2 border-[#151010] rounded-[22px] p-6 sm:p-8 lg:p-10 shadow-[6px_6px_0px_#151010] hover:shadow-[8px_8px_0px_#151010] hover:-translate-y-1 transition-all"
             >
-              <div className="col-span-12 md:col-span-3">
-                <div className={`${label} text-lime mb-3`}>0{i + 1}</div>
-                <h3 className={`${display} font-normal leading-[0.95] text-[clamp(1.75rem,3vw,2.75rem)] text-paper`}>
-                  {job.company}
-                </h3>
-                <div className={`mt-2 ${label} text-ash`}>{job.role}</div>
-                {"location" in job && job.location && (
-                  <div className="mt-1 font-mono text-[10px] tracking-[0.14em] uppercase text-paper/40">
-                    {job.location}
+              <div className="grid grid-cols-12 gap-6 items-start">
+                <div className="col-span-12 md:col-span-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="w-8 h-8 rounded-full bg-[#CEFF00] border-2 border-[#151010] font-mono text-[13px] font-black flex items-center justify-center">
+                      0{i + 1}
+                    </span>
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-[#0039FF] font-extrabold">
+                      {job.location}
+                    </span>
                   </div>
-                )}
+                  <h3 className="text-2xl sm:text-3xl font-black text-[#151010] mt-1">
+                    {job.company}
+                  </h3>
+                  <div className="mt-1 text-sm font-bold text-[#0039FF]">
+                    {job.role}
+                  </div>
+                </div>
+
+                <div className="col-span-12 md:col-span-8 md:pl-6 md:border-l border-[#151010]/15">
+                  <ul className="space-y-2.5">
+                    {job.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-3 text-[14px] sm:text-[15px] font-medium text-[#151010]/85 leading-relaxed">
+                        <span className="text-[#0039FF] text-base leading-none mt-1">▶</span>
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <ul className="col-span-12 md:col-span-9 md:pl-10 space-y-3 text-[14px] leading-[1.65] text-paper/85">
-                {job.bullets.map((b) => (
-                  <li key={b} className="flex items-baseline gap-3">
-                    <span className="text-lime text-[10px]">▶</span>
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.article>
+            </motion.div>
           ))}
         </div>
       </div>
+
+      {/* Animated Wave Bottom Divider */}
+      <div className="wave-bottom-blue" />
     </section>
   );
 }
 
-/* ─────────────── PORTFOLIO ─────────────── */
-function CreditsTicker() {
-  const credits = [
-    "DaVinci Resolve",
-    "After Effects",
-    "Photoshop",
-    "Lightroom",
-    "CapCut",
-    "Runway",
-    "Kling",
-    "Veo",
-    "Higgsfield",
-    "Google Flow",
-  ];
-  return (
-    <div className="relative bg-lime text-paper border-y-2 border-paper overflow-hidden">
-      <Marquee speed={32} className="py-4">
-        {credits.map((c) => (
-          <span key={c} className="inline-flex items-center gap-4 font-display font-black lowercase text-[clamp(1.5rem,3vw,2.5rem)] tracking-[-0.02em]">
-            {c}
-            <span className="text-signal">✺</span>
-          </span>
-        ))}
-      </Marquee>
-    </div>
-  );
-}
-
-const INITIAL_POSTERS = 6;
+/* ─────────────── POSTERS & DESIGN GALLERY ─────────────── */
+const INITIAL_POSTERS = 8;
 
 function PortfolioGrid() {
   const [lightbox, setLightbox] = useState<string | null>(null);
@@ -389,23 +417,21 @@ function PortfolioGrid() {
   const hasMore = portfolio.length > INITIAL_POSTERS;
 
   return (
-    <section id="portfolio" className="relative bg-void text-paper py-[14vh] px-[5vw] md:px-[3vw]">
-      <div className="relative z-20">
-        <div className="grid grid-cols-12 gap-6 mb-12">
-          <div className="col-span-12 md:col-span-2">
-            <PhaseMark n="004" label="Posters" />
-          </div>
-          <div className="col-span-12 md:col-span-10">
-            <h2 className={`${display} font-black leading-[0.9] text-[clamp(2.5rem,8vw,8rem)] text-paper lowercase`}>
-              the <span className="text-lime italic">posters</span>.
+    <section id="portfolio" className="relative bg-[#FFF7EC] text-[#151010] py-24 md:py-32 px-4 sm:px-6 lg:px-12">
+      <div className="max-w-[1600px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <PhaseBadge n="005" label="Print & Social" />
+            <h2 className="text-[clamp(2.75rem,7vw,6.5rem)] font-black leading-[0.95] text-[#0039FF] tracking-tight mt-4">
+              Posters &amp; <span className="text-[#151010] underline decoration-[#CEFF00] decoration-wavy decoration-4">Artwork</span>.
             </h2>
-            <p className="mt-6 text-[14px] leading-[1.65] text-ash max-w-[52ch]">
-              Print, social and campaign artwork — tap any tile to open it full size.
+            <p className="mt-4 text-[16px] md:text-[18px] text-[#151010]/80 font-medium max-w-[50ch]">
+              Print, event branding, social campaign banners, and design collateral. Tap any poster to view full size.
             </p>
           </div>
         </div>
 
-        <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           <AnimatePresence mode="popLayout" initial={false}>
             {visible.map((p, i) => (
               <motion.button
@@ -413,35 +439,43 @@ function PortfolioGrid() {
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4, delay: (i % 6) * 0.04 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.35, delay: (i % 6) * 0.04 }}
                 type="button"
                 onClick={() => setLightbox(p.thumbnail)}
-                className="group relative bg-warm border border-paper/[0.06] hover:border-lime/40 transition-colors overflow-hidden aspect-[3/4]"
+                className="group relative bg-white border-2 border-[#151010] rounded-[20px] overflow-hidden aspect-[3/4] shadow-[4px_4px_0px_#151010] hover:shadow-[6px_6px_0px_#151010] hover:-translate-y-1 transition-all cursor-pointer"
                 aria-label={`Open ${p.title}`}
               >
                 <img
                   src={p.thumbnail}
                   alt={p.title}
                   loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <span className={`absolute top-3 left-3 ${label} bg-void/70 text-paper px-2 py-1`}>
+
+                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs text-[#151010] font-mono text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#151010]/20 shadow-xs">
                   {String(i + 1).padStart(2, "0")}
                 </span>
+
+                <div className="absolute inset-0 bg-[#0039FF]/0 group-hover:bg-[#0039FF]/20 transition-colors flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity w-12 h-12 rounded-full bg-[#CEFF00] border-2 border-[#151010] flex items-center justify-center shadow-[2px_2px_0px_#151010]">
+                    <ArrowIcon className="w-4 h-4 text-[#151010]" />
+                  </span>
+                </div>
               </motion.button>
             ))}
           </AnimatePresence>
         </motion.div>
 
         {hasMore && (
-          <div className="mt-10 flex justify-center">
+          <div className="mt-12 flex justify-center">
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="inline-flex items-center gap-2 border border-lime text-lime px-6 py-3 font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-lime hover:text-paper transition-colors"
+              className="group inline-flex items-center gap-3 bg-[#CEFF00] hover:bg-[#d8ff26] text-[#151010] border-2 border-[#151010] px-8 py-4 rounded-[14px] text-[15px] font-extrabold tracking-wide uppercase transition-all shadow-[4px_4px_0px_#151010] hover:-translate-y-0.5 cursor-pointer"
             >
-              {expanded ? "See less ↑" : `See more (${portfolio.length - INITIAL_POSTERS}) ↓`}
+              <span>{expanded ? "See less ↑" : `See more (${portfolio.length - INITIAL_POSTERS})`}</span>
+              <ArrowIcon className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -455,7 +489,7 @@ function PortfolioGrid() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setLightbox(null)}
-            className="fixed inset-0 z-[80] bg-void/95 flex items-center justify-center p-6 cursor-zoom-out"
+            className="fixed inset-0 z-[100] bg-[#151010]/95 backdrop-blur-md flex items-center justify-center p-6 cursor-zoom-out"
           >
             <motion.img
               initial={{ scale: 0.95 }}
@@ -463,11 +497,11 @@ function PortfolioGrid() {
               exit={{ scale: 0.95 }}
               src={lightbox}
               alt=""
-              className="max-w-full max-h-full object-contain"
+              className="max-w-full max-h-[90vh] object-contain rounded-xl border-2 border-white/20"
             />
             <button
               onClick={() => setLightbox(null)}
-              className="absolute top-6 right-6 font-mono text-[11px] tracking-[0.2em] uppercase text-paper border border-paper/40 px-3 py-1.5 hover:text-lime hover:border-lime"
+              className="absolute top-6 right-6 font-mono text-xs font-bold uppercase text-white bg-white/10 border border-white/30 px-4 py-2 rounded-full hover:bg-white hover:text-[#151010] transition-colors"
             >
               Close ✕
             </button>
@@ -478,79 +512,104 @@ function PortfolioGrid() {
   );
 }
 
-/* ─────────────── CONTACT ─────────────── */
+/* ─────────────── FOOTER (DAREN & CURTIS CONTRASTING BLUE FOOTER) ─────────────── */
 function Contact() {
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
-  const scale = useTransform(scrollYProgress, [0, 1], [0.94, 1]);
-
   return (
-    <section id="contact" ref={ref} className="relative bg-void text-paper min-h-[80vh] flex flex-col justify-between px-[5vw] md:px-[3vw] py-[8vh] md:py-[12vh] overflow-hidden gap-12">
-      <HairlineGrid />
-      <div className="relative z-20 flex items-start justify-between">
-        <PhaseMark n="006" label="Contact / End" />
-        <span className={`${label} text-ash`}>// 2026</span>
-      </div>
+    <footer id="contact" className="relative bg-[#0039FF] text-white pt-24 pb-12 px-4 sm:px-6 lg:px-12 overflow-hidden">
+      {/* Animated Wave Top Divider */}
+      <div className="wave-top-blue" />
 
-      <motion.div style={{ scale }} className="relative z-20 grid grid-cols-12 gap-8 md:gap-6 my-8">
-        <div className="col-span-12 md:col-span-8">
-          <h2 className={`${display} font-black leading-[0.85] text-[clamp(2.75rem,11vw,11rem)] text-paper lowercase`}>
-            let's make<br />
-            <span className="text-lime italic">something</span><br />
-            <span className="text-signal">silly-good</span>.
-          </h2>
-          <p className="mt-8 text-[14px] leading-[1.65] text-ash max-w-[48ch]">
-            Available for full-time, freelance, late-night reel emergencies and "can you do this by tomorrow"
-            briefs. Bring snacks.
-          </p>
+      <div className="max-w-[1600px] mx-auto relative z-20">
+        <div className="grid grid-cols-12 gap-10 pb-16 border-b border-white/20">
+          <div className="col-span-12 lg:col-span-7">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/30 bg-white/10 text-[12px] font-mono uppercase tracking-wider text-[#CEFF00] font-bold mb-4">
+              <span className="w-2 h-2 rounded-full bg-[#CEFF00] animate-pulse" />
+              <span>Get In Touch</span>
+            </div>
+            <h2 className="text-[clamp(2.75rem,7.5vw,7rem)] font-black leading-[0.92] text-white tracking-tight uppercase">
+              Ready To Go<br />
+              <span className="text-[#CEFF00]">Social-First?</span>
+            </h2>
+            <p className="mt-4 text-2xl font-bold text-white/90">
+              We Got You!
+            </p>
+            <p className="mt-4 text-[16px] text-white/80 max-w-[48ch] font-medium leading-relaxed">
+              Available for commercial contracts, high-converting social campaigns, reel retainers, and fast-turnaround video edits.
+            </p>
+
+            <div className="mt-8">
+              <a
+                href="mailto:32charan@gmail.com?subject=Project%20Inquiry%20via%20Portfolio"
+                className="group inline-flex items-center gap-3 bg-[#CEFF00] hover:bg-[#d8ff26] text-[#151010] border-2 border-[#151010] px-8 py-4 rounded-[14px] text-[16px] font-black tracking-wide uppercase transition-all shadow-[4px_4px_0px_#151010] hover:-translate-y-0.5 cursor-pointer"
+              >
+                <span>Get in Touch</span>
+                <ArrowIcon className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+
+          <div className="col-span-12 lg:col-span-5 flex flex-col justify-end gap-5">
+            <div className="bg-white text-[#151010] border-2 border-[#151010] rounded-[22px] p-6 sm:p-8 shadow-[6px_6px_0px_#151010]">
+              <h3 className="font-mono text-xs uppercase tracking-widest text-[#0039FF] font-bold mb-4">
+                // Direct Contact
+              </h3>
+              <div className="space-y-3 font-semibold text-[15px]">
+                <a
+                  href="mailto:32charan@gmail.com"
+                  className="flex items-center justify-between p-2.5 rounded-lg hover:bg-[#BEEBFD] transition-colors"
+                >
+                  <span className="text-[#151010]/60 font-mono text-xs">Email</span>
+                  <span className="text-[#0039FF] font-bold">32charan@gmail.com</span>
+                </a>
+                <a
+                  href="tel:+918951448408"
+                  className="flex items-center justify-between p-2.5 rounded-lg hover:bg-[#BEEBFD] transition-colors"
+                >
+                  <span className="text-[#151010]/60 font-mono text-xs">Phone / WhatsApp</span>
+                  <span className="text-[#151010] font-bold">+91 89514 48408</span>
+                </a>
+                <div className="flex items-center justify-between p-2.5 rounded-lg">
+                  <span className="text-[#151010]/60 font-mono text-xs">Location</span>
+                  <span className="text-[#151010] font-bold">Bengaluru, India</span>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/32charan/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between p-2.5 rounded-lg hover:bg-[#BEEBFD] transition-colors"
+                >
+                  <span className="text-[#151010]/60 font-mono text-xs">LinkedIn</span>
+                  <span className="text-[#0039FF] font-bold">/in/32charan</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="col-span-12 md:col-span-4 flex flex-col md:justify-end gap-4 font-mono text-[11px] tracking-[0.1em] uppercase">
-          <a href="mailto:32charan@gmail.com" className="text-paper hover:text-lime transition-colors block break-all">
-            <span className="text-ash">EMAIL — </span>32charan@gmail.com
-          </a>
-          <a href="tel:+918951448408" className="text-paper hover:text-lime transition-colors block">
-            <span className="text-ash">PHONE — </span>+91 89514 48408
-          </a>
-          <span className="text-paper block">
-            <span className="text-ash">LOCATION — </span>Bengaluru, Karnataka, India
-          </span>
-          <a href="https://www.linkedin.com/in/32charan/" target="_blank" rel="noreferrer" className="text-paper hover:text-lime transition-colors block">
-            <span className="text-ash">LINKEDIN — </span>/in/32charan
-          </a>
-          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="text-paper hover:text-lime transition-colors block">
-            <span className="text-ash">INSTAGRAM — </span>@charan
-          </a>
-          <a
-            href="mailto:32charan@gmail.com?subject=Project%20Inquiry"
-            className="mt-4 inline-block border border-lime px-5 py-3 text-lime hover:bg-lime hover:text-paper transition-colors w-fit"
-          >
-            Start a project →
+        <div className="pt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-xs font-mono text-white/70">
+          <span>© 2026 Charan — Video Editor · Colorist · Motion Designer</span>
+          <a href="#top" className="hover:text-[#CEFF00] font-bold transition-colors">
+            Back to Top ↑
           </a>
         </div>
-      </motion.div>
-
-      <div className="relative z-20 pt-6 border-t border-paper/15 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 font-mono text-[10px] tracking-[0.2em] uppercase text-ash">
-        <span>// 2026 — Charan · Video Editor · Colorist</span>
-        <a href="#top" className="hover:text-lime transition-colors">Back to top ↑</a>
       </div>
-    </section>
+    </footer>
   );
 }
 
+/* ─────────────── PORTFOLIO WRAPPER ─────────────── */
 export function Portfolio() {
   return (
     <VideoProvider>
-      <main className="bg-void relative">
+      <div className="min-h-screen bg-[#FFF7EC] text-[#151010] selection:bg-[#CEFF00] selection:text-[#151010]">
         <Hero />
-        <About />
         <CreditsTicker />
+        <About />
+        <Experience />
         <VideosSection />
         <PortfolioGrid />
-        <Experience />
         <Contact />
-        <div className="grain-overlay" aria-hidden />
-      </main>
+      </div>
     </VideoProvider>
   );
 }

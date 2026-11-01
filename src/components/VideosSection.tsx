@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useVideoManager } from "./VideoManager";
-import { HairlineGrid } from "./HairlineGrid";
 import {
   INITIAL_VIDEOS,
   ENABLE_ARRANGE_MODE,
@@ -12,9 +11,8 @@ import {
 } from "@/data/videos";
 import { saveVideosToCodebase } from "@/lib/api/videos.functions";
 import { toast } from "sonner";
-
-const display = "font-display tracking-[-0.025em]";
-const label = "font-mono text-[10px] tracking-[0.18em] uppercase";
+import { DecorationStar } from "./daren-curtis/DecorationStar";
+import { ArrowIcon } from "./daren-curtis/ArrowIcon";
 
 const INITIAL_COUNT = 9;
 
@@ -217,8 +215,8 @@ function VideoTile({
   const aspect = ASPECT_CLASS[declaredRatio];
 
   const wrapClass = isFullscreen
-    ? "fixed inset-0 z-50 flex items-center justify-center bg-void"
-    : `relative w-full ${aspect} bg-void`;
+    ? "fixed inset-0 z-50 flex items-center justify-center bg-[#151010]"
+    : `relative w-full ${aspect} bg-[#151010]`;
 
   const videoClass = isFullscreen && declaredRatio === "9:16"
     ? "max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
@@ -239,17 +237,15 @@ function VideoTile({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.4 }}
-      className={`group relative bg-charcoal border transition-all overflow-hidden ${
-        isArrangeMode
-          ? "border-lime/60 ring-2 ring-lime/20"
-          : "border-paper/[0.06] hover:border-lime/40"
+      className={`group relative bg-white border-2 border-[#151010] rounded-[22px] overflow-hidden shadow-[4px_4px_0px_#151010] hover:shadow-[6px_6px_0px_#151010] transition-all ${
+        isArrangeMode ? "ring-4 ring-[#0039FF]/50" : ""
       } ${declaredRatio === "9:16" ? "md:row-span-2" : ""}`}
     >
       {/* ── ARRANGE MODE TOOLBAR (TOP OVERLAY) ── */}
       {isArrangeMode && (
-        <div className="z-30 bg-charcoal/95 border-b border-paper/10 p-2 text-xs flex flex-col gap-1.5 backdrop-blur-md">
+        <div className="z-30 bg-[#FFF7EC] border-b-2 border-[#151010] p-3 text-xs flex flex-col gap-2">
           <div className="flex items-center justify-between gap-1 text-[11px] font-mono">
-            <span className="bg-lime text-void px-1.5 py-0.5 font-bold rounded-xs tracking-wider">
+            <span className="bg-[#0039FF] text-white px-2 py-0.5 font-bold rounded-md">
               #{String(globalIndex + 1).padStart(2, "0")}
             </span>
             <div className="flex items-center gap-1">
@@ -257,7 +253,7 @@ function VideoTile({
                 type="button"
                 onClick={onMoveTop}
                 title="Move straight to top of portfolio (#1)"
-                className="bg-signal text-paper px-2 py-0.5 font-semibold text-[10px] uppercase tracking-wider hover:brightness-110 flex items-center gap-1 shadow-xs cursor-pointer"
+                className="bg-[#CEFF00] text-[#151010] border border-[#151010] px-2 py-0.5 font-extrabold text-[10px] uppercase rounded-md hover:brightness-105 shadow-xs cursor-pointer"
               >
                 ★ Top
               </button>
@@ -266,7 +262,7 @@ function VideoTile({
                 disabled={!canMoveUp}
                 onClick={onMoveUp}
                 title="Move up one position"
-                className="bg-paper/10 hover:bg-paper/20 disabled:opacity-30 disabled:pointer-events-none text-paper px-1.5 py-0.5 text-[10px] cursor-pointer"
+                className="bg-white border border-[#151010] hover:bg-[#BEEBFD] disabled:opacity-30 disabled:pointer-events-none text-[#151010] px-2 py-0.5 text-[10px] rounded-md cursor-pointer font-bold"
               >
                 ▲
               </button>
@@ -275,7 +271,7 @@ function VideoTile({
                 disabled={!canMoveDown}
                 onClick={onMoveDown}
                 title="Move down one position"
-                className="bg-paper/10 hover:bg-paper/20 disabled:opacity-30 disabled:pointer-events-none text-paper px-1.5 py-0.5 text-[10px] cursor-pointer"
+                className="bg-white border border-[#151010] hover:bg-[#BEEBFD] disabled:opacity-30 disabled:pointer-events-none text-[#151010] px-2 py-0.5 text-[10px] rounded-md cursor-pointer font-bold"
               >
                 ▼
               </button>
@@ -283,22 +279,21 @@ function VideoTile({
                 type="button"
                 onClick={onDelete}
                 title="Remove video from portfolio"
-                className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-1.5 py-0.5 text-[10px] cursor-pointer"
+                className="bg-red-100 border border-red-500 text-red-600 hover:bg-red-200 px-2 py-0.5 text-[10px] rounded-md cursor-pointer font-bold"
               >
                 ✕
               </button>
             </div>
           </div>
 
-          {/* Category & Ratio controls */}
-          <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+          <div className="grid grid-cols-2 gap-1.5">
             <select
               value={category}
               onChange={(e) => onUpdateCategory(e.target.value as VideoCategory)}
-              className="bg-void border border-paper/20 text-[10px] font-mono text-paper px-1 py-1 rounded-xs focus:outline-none focus:border-lime cursor-pointer"
+              className="bg-white border border-[#151010] text-[11px] font-medium text-[#151010] px-1.5 py-1 rounded-md focus:outline-none focus:ring-1 focus:ring-[#0039FF] cursor-pointer"
             >
               {VIDEO_CATEGORIES.filter((c) => c.id !== "all").map((c) => (
-                <option key={c.id} value={c.id} className="bg-void text-paper">
+                <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
               ))}
@@ -307,13 +302,12 @@ function VideoTile({
             <button
               type="button"
               onClick={() => onUpdateRatio(declaredRatio === "9:16" ? "16:9" : "9:16")}
-              className="bg-void border border-paper/20 text-[10px] font-mono text-lime hover:border-lime px-1 py-1 text-center cursor-pointer"
+              className="bg-white border border-[#151010] text-[11px] font-bold text-[#0039FF] hover:bg-[#BEEBFD] px-1.5 py-1 text-center rounded-md cursor-pointer"
             >
               Ratio: {declaredRatio}
             </button>
           </div>
 
-          {/* Title Editor */}
           {isEditingTitle ? (
             <form onSubmit={handleTitleSubmit} className="flex gap-1 pt-1">
               <input
@@ -321,20 +315,20 @@ function VideoTile({
                 value={titleDraft}
                 onChange={(e) => setTitleDraft(e.target.value)}
                 autoFocus
-                className="flex-1 bg-void border border-lime text-[11px] text-paper px-1.5 py-0.5 font-mono focus:outline-none"
+                className="flex-1 bg-white border-2 border-[#0039FF] text-[11px] text-[#151010] px-2 py-1 font-medium rounded-md focus:outline-none"
               />
-              <button type="submit" className="bg-lime text-void px-2 py-0.5 text-[10px] font-bold cursor-pointer">
+              <button type="submit" className="bg-[#0039FF] text-white px-2.5 py-1 text-[11px] font-bold rounded-md cursor-pointer">
                 ✓
               </button>
             </form>
           ) : (
             <div
               onClick={() => setIsEditingTitle(true)}
-              className="flex items-center justify-between text-[11px] text-paper/80 font-mono hover:text-lime cursor-pointer truncate pt-0.5"
+              className="flex items-center justify-between text-[11px] text-[#151010] font-semibold hover:text-[#0039FF] cursor-pointer truncate pt-0.5"
               title="Click to edit title"
             >
               <span className="truncate">{title}</span>
-              <span className="text-[9px] text-ash underline ml-1">edit</span>
+              <span className="text-[10px] text-[#0039FF] underline ml-1 font-mono">edit</span>
             </div>
           )}
         </div>
@@ -363,35 +357,30 @@ function VideoTile({
             className={videoClass}
           />
         )}
+
+        {/* Daren & Curtis Signature Circular Play Button */}
         {!playing && (
           <button
             type="button"
             onClick={toggle}
             aria-label={`Play ${title}`}
-            className="absolute inset-0 flex items-center justify-center bg-void/25 hover:bg-void/40 transition-colors"
+            className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/35 transition-colors cursor-pointer"
           >
-            <span className="w-16 h-16 rounded-full border border-paper/70 flex items-center justify-center bg-void/60 group-hover:scale-105 transition-transform">
-              <span className="block w-0 h-0 border-y-[9px] border-y-transparent border-l-[14px] border-l-paper ml-1" />
+            <span className="w-16 h-16 rounded-full border-2 border-[#151010] bg-[#CEFF00] text-[#151010] flex items-center justify-center shadow-[3px_3px_0px_#151010] transition-transform group-hover:scale-110">
+              <span className="block w-0 h-0 border-y-[8px] border-y-transparent border-l-[13px] border-l-[#151010] ml-1" />
             </span>
           </button>
         )}
 
-        {/* Normal Badges (Hidden in arrange mode to reduce clutter) */}
+        {/* Top Badges (D&C style pills) */}
         {!isArrangeMode && (
           <>
-            <span className={`absolute top-3 left-3 ${label} bg-void/70 text-paper px-2 py-1`}>
-              {String(globalIndex + 1).padStart(2, "0")}
+            <span className="absolute top-3.5 left-3.5 bg-white/90 backdrop-blur-xs text-[#151010] font-mono text-[11px] font-bold px-2.5 py-1 rounded-full border border-[#151010]/20 shadow-xs">
+              0{globalIndex + 1}
             </span>
-            <span className={`absolute top-3 right-3 ${label} bg-void/70 text-lime px-2 py-1`}>
+            <span className="absolute top-3.5 right-3.5 bg-[#CEFF00] text-[#151010] font-mono text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-[#151010] shadow-xs">
               {declaredRatio}
             </span>
-            {title && (
-              <div className="absolute bottom-3 left-3 right-14 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="bg-void/80 backdrop-blur-xs text-paper/90 px-2.5 py-1 text-[11px] font-mono truncate inline-block max-w-full">
-                  {title}
-                </span>
-              </div>
-            )}
           </>
         )}
 
@@ -400,13 +389,30 @@ function VideoTile({
           type="button"
           onClick={goFullscreen}
           aria-label="Play fullscreen"
-          className="absolute bottom-3 right-3 z-10 inline-flex items-center justify-center w-9 h-9 bg-void/70 hover:bg-lime hover:text-paper text-paper border border-paper/30 transition-colors cursor-pointer"
+          className="absolute bottom-3.5 right-3.5 z-10 inline-flex items-center justify-center w-9 h-9 bg-white/90 hover:bg-[#CEFF00] text-[#151010] border border-[#151010] rounded-xl transition-all shadow-xs cursor-pointer"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
           </svg>
         </button>
       </div>
+
+      {/* D&C Style Bottom Title Bar */}
+      {!isArrangeMode && title && (
+        <div className="p-4 bg-white border-t border-[#151010]/10 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <span className="block text-[10px] font-mono tracking-wider uppercase text-[#0039FF] font-bold">
+              {category.replace("-", " ")}
+            </span>
+            <h4 className="text-[14px] font-bold text-[#151010] truncate mt-0.5">
+              {title}
+            </h4>
+          </div>
+          <div className="w-8 h-8 rounded-full border border-[#151010] flex items-center justify-center bg-[#FFF7EC] group-hover:bg-[#CEFF00] transition-colors shrink-0">
+            <ArrowIcon className="w-3 h-3 text-[#151010]" />
+          </div>
+        </div>
+      )}
     </motion.article>
   );
 }
@@ -419,7 +425,6 @@ export function VideosSection() {
   const [isArrangeMode, setIsArrangeMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize from LocalStorage if present
   useEffect(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -434,7 +439,6 @@ export function VideosSection() {
     }
   }, []);
 
-  // Save to LocalStorage whenever videos order/attributes change
   const updateVideos = (newVideos: VideoItem[]) => {
     setVideos(newVideos);
     try {
@@ -444,7 +448,6 @@ export function VideosSection() {
     }
   };
 
-  // Reordering handlers
   const handleMoveTop = (globalIndex: number) => {
     if (globalIndex === 0) return;
     const item = videos[globalIndex];
@@ -535,13 +538,11 @@ export function VideosSection() {
     toast.success("TypeScript array copied to clipboard!");
   };
 
-  // Filtered items based on active category
   const filteredVideos = useMemo(() => {
     if (selectedCategory === "all") return videos;
     return videos.filter((v) => v.category === selectedCategory);
   }, [videos, selectedCategory]);
 
-  // In arrange mode, show all filtered items so user can reorder easily; otherwise paginate
   const visible = isArrangeMode
     ? filteredVideos
     : expanded
@@ -550,7 +551,6 @@ export function VideosSection() {
 
   const hasMore = !isArrangeMode && filteredVideos.length > INITIAL_COUNT;
 
-  // Category counts map
   const categoryCounts = useMemo(() => {
     const map: Record<string, number> = { all: videos.length };
     for (const v of videos) {
@@ -560,99 +560,96 @@ export function VideosSection() {
   }, [videos]);
 
   return (
-    <section id="videos" className="relative bg-void text-paper py-[14vh] px-[5vw] md:px-[3vw]">
-      <HairlineGrid />
-      <div className="relative z-20">
-        {/* Header */}
-        <div className="grid grid-cols-12 gap-6 mb-8">
-          <div className="col-span-12 md:col-span-2">
-            <div className="font-mono text-[11px] tracking-[0.18em] uppercase text-ash flex items-center gap-2">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-lime animate-pulse" />
-              <span className="text-lime">003</span>
-              <span className="text-paper/30">/</span>
-              <span>Videos</span>
+    <section id="videos" className="relative bg-[#FFF7EC] text-[#151010] py-24 md:py-32 px-4 sm:px-6 lg:px-12 overflow-hidden">
+      {/* Decorative D&C Star */}
+      <div className="absolute top-12 right-6 md:right-16 hidden sm:block pointer-events-none">
+        <DecorationStar className="w-16 h-14 md:w-20 md:h-16 animate-dc-float" fill="#CEFF00" stroke="#151010" />
+      </div>
+
+      <div className="max-w-[1600px] mx-auto relative z-20">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#151010]/20 bg-white text-[12px] font-mono uppercase tracking-wider text-[#0039FF] font-bold mb-4 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-[#0039FF] animate-pulse" />
+              <span>003 / Selected Works</span>
             </div>
-          </div>
-          <div className="col-span-12 md:col-span-7">
-            <h2 className={`${display} font-black leading-[0.9] text-[clamp(2.5rem,8vw,8rem)] text-paper lowercase`}>
-              the <span className="text-lime italic">edits</span>.
+            <h2 className="text-[clamp(2.75rem,7vw,6.5rem)] font-black leading-[0.95] text-[#0039FF] tracking-tight">
+              Featured <span className="text-[#151010] underline decoration-[#CEFF00] decoration-wavy decoration-4">Edits</span>.
             </h2>
-            <p className="mt-6 text-[14px] leading-[1.65] text-ash max-w-[52ch]">
-              Commercial edits, real estate showcases, food & hospitality, healthcare campaigns, and motion design.
-              Tap any tile to play — one video at a time, adaptive quality.
+            <p className="mt-4 text-[16px] md:text-[18px] text-[#151010]/80 max-w-[55ch] font-medium leading-relaxed">
+              Commercial storytelling, high-performing brand ads, real estate reels, and cinematic edits. Tap any card to play with sound.
             </p>
           </div>
 
-          {/* Arrange Mode Toggle Button (Can be permanently hidden via ENABLE_ARRANGE_MODE) */}
           {ENABLE_ARRANGE_MODE && (
-            <div className="col-span-12 md:col-span-3 flex md:justify-end items-start pt-2">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setIsArrangeMode((v) => !v)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] tracking-[0.18em] uppercase transition-all border cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-5 py-3 rounded-[12px] font-bold text-[13px] border-2 border-[#151010] transition-all cursor-pointer ${
                   isArrangeMode
-                    ? "bg-lime text-void border-lime font-bold shadow-[0_0_20px_rgba(204,255,0,0.4)]"
-                    : "border-paper/20 text-paper/80 hover:border-lime hover:text-lime"
+                    ? "bg-[#CEFF00] text-[#151010] shadow-[3px_3px_0px_#151010]"
+                    : "bg-white text-[#151010] hover:bg-[#BEEBFD]"
                 }`}
               >
                 <span>{isArrangeMode ? "✕ Exit Arrange" : "⇄ Arrange Videos"}</span>
-                {isArrangeMode && <span className="w-2 h-2 rounded-full bg-signal animate-ping" />}
               </button>
             </div>
           )}
         </div>
 
-        {/* ── ARRANGE MODE DOCK / BANNER ── */}
+        {/* Arrange Mode Dock */}
         {ENABLE_ARRANGE_MODE && isArrangeMode && (
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
-            className="mb-8 p-4 bg-charcoal border-2 border-lime/80 shadow-[0_4px_30px_rgba(0,0,0,0.6)]"
+            className="mb-10 p-5 bg-white border-2 border-[#151010] rounded-[20px] shadow-[6px_6px_0px_#151010]"
           >
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-lime animate-pulse" />
-                  <span className="font-mono text-[12px] font-bold text-lime uppercase tracking-widest">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#0039FF] animate-pulse" />
+                  <span className="font-extrabold text-[14px] text-[#0039FF] uppercase tracking-wider">
                     Arrange & Edit Mode Active
                   </span>
-                  <span className="text-[11px] font-mono text-ash">
-                    ({videos.length} videos total)
+                  <span className="text-xs font-mono text-[#151010]/60 font-semibold">
+                    ({videos.length} videos)
                   </span>
                 </div>
-                <p className="text-[12px] text-paper/70 font-mono mt-1">
-                  Click <strong className="text-signal">★ Top</strong> to place any video at #1, use ▲/▼ to reorder, or change categories. Then click <strong className="text-lime">Save to Codebase</strong>.
+                <p className="text-[13px] text-[#151010]/80 mt-1 font-medium">
+                  Click <strong className="text-[#0039FF]">★ Top</strong> on any card to move it to #1. When finished, click <strong className="text-[#0039FF]">Save to Codebase</strong>.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <button
                   type="button"
                   disabled={isSaving}
                   onClick={handleSaveToCodebase}
-                  className="bg-lime text-void px-4 py-2 font-mono text-[11px] tracking-[0.15em] font-black uppercase hover:brightness-110 transition-all shadow-[2px_2px_0_0_#fff] flex items-center gap-2 cursor-pointer"
+                  className="bg-[#CEFF00] text-[#151010] border-2 border-[#151010] px-5 py-2.5 rounded-[12px] text-[12px] font-extrabold uppercase hover:brightness-105 shadow-[2px_2px_0px_#151010] cursor-pointer"
                 >
                   {isSaving ? "Saving..." : "💾 Save to Codebase"}
                 </button>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="border border-paper/20 hover:border-paper text-paper px-3 py-2 font-mono text-[11px] tracking-[0.15em] uppercase transition-colors cursor-pointer"
+                  className="bg-white hover:bg-[#FFF7EC] text-[#151010] border-2 border-[#151010] px-4 py-2.5 rounded-[12px] text-[12px] font-bold uppercase transition-colors cursor-pointer"
                 >
                   📋 Copy Code
                 </button>
                 <button
                   type="button"
                   onClick={handleResetToCodebase}
-                  className="border border-paper/20 hover:border-red-400 text-ash hover:text-red-400 px-3 py-2 font-mono text-[11px] tracking-[0.15em] uppercase transition-colors cursor-pointer"
+                  className="bg-white hover:bg-red-50 text-red-600 border border-red-300 px-4 py-2.5 rounded-[12px] text-[12px] font-bold uppercase transition-colors cursor-pointer"
                 >
                   ↺ Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsArrangeMode(false)}
-                  className="bg-paper/10 hover:bg-paper/20 text-paper px-3 py-2 font-mono text-[11px] tracking-[0.15em] uppercase transition-colors cursor-pointer"
+                  className="bg-[#151010] text-white px-4 py-2.5 rounded-[12px] text-[12px] font-bold uppercase hover:bg-black transition-colors cursor-pointer"
                 >
                   Done
                 </button>
@@ -661,8 +658,8 @@ export function VideosSection() {
           </motion.div>
         )}
 
-        {/* ── CATEGORY FILTER PILLS ── */}
-        <div className="mb-10 flex items-center gap-2 flex-wrap pb-2 border-b border-paper/[0.08]">
+        {/* Category Pills (Daren & Curtis rounded pill styling) */}
+        <div className="mb-10 flex items-center gap-2.5 flex-wrap pb-2">
           {VIDEO_CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.id;
             const count = categoryCounts[cat.id] ?? 0;
@@ -671,16 +668,16 @@ export function VideosSection() {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`font-mono text-[11px] tracking-[0.15em] uppercase px-3.5 py-2 transition-all flex items-center gap-2 border cursor-pointer ${
+                className={`text-[13px] font-bold px-4 py-2 rounded-full border-2 border-[#151010] transition-all flex items-center gap-2 cursor-pointer ${
                   isSelected
-                    ? "bg-lime text-void border-lime font-bold shadow-[2px_2px_0_0_rgba(255,255,255,0.2)]"
-                    : "border-paper/15 text-ash hover:border-lime/50 hover:text-paper bg-void/50"
+                    ? "bg-[#0039FF] text-white border-[#0039FF] shadow-[3px_3px_0px_#151010]"
+                    : "bg-white text-[#151010] hover:bg-[#BEEBFD]"
                 }`}
               >
                 <span>{cat.label}</span>
                 <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded-full ${
-                    isSelected ? "bg-void text-lime font-semibold" : "bg-paper/10 text-ash"
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                    isSelected ? "bg-[#CEFF00] text-[#151010]" : "bg-[#151010]/10 text-[#151010]"
                   }`}
                 >
                   {count}
@@ -690,10 +687,10 @@ export function VideosSection() {
           })}
         </div>
 
-        {/* ── VIDEO TILES GRID ── */}
+        {/* Video Grid */}
         <motion.div
           layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-auto"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto"
         >
           <AnimatePresence mode="popLayout" initial={false}>
             {visible.map((item) => {
@@ -719,17 +716,16 @@ export function VideosSection() {
           </AnimatePresence>
         </motion.div>
 
-        {/* ── SEE MORE / SEE LESS ── */}
+        {/* See More Button (D&C Style) */}
         {hasMore && (
-          <div className="mt-12 flex justify-center">
+          <div className="mt-14 flex justify-center">
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="inline-flex items-center gap-2 border border-lime text-lime px-8 py-3.5 font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-lime hover:text-paper transition-colors font-semibold cursor-pointer"
+              className="group inline-flex items-center gap-3 bg-[#CEFF00] hover:bg-[#d8ff26] text-[#151010] border-2 border-[#151010] px-8 py-4 rounded-[14px] text-[15px] font-extrabold tracking-wide uppercase transition-all shadow-[4px_4px_0px_#151010] hover:-translate-y-0.5 cursor-pointer"
             >
-              {expanded
-                ? "See less ↑"
-                : `See more (${filteredVideos.length - INITIAL_COUNT} remaining) ↓`}
+              <span>{expanded ? "See less ↑" : `See more (${filteredVideos.length - INITIAL_COUNT})`}</span>
+              <ArrowIcon className="w-4 h-4" />
             </button>
           </div>
         )}
