@@ -18,7 +18,7 @@ const VideoItemSchema = z.object({
 });
 
 export const saveVideosToCodebase = createServerFn({ method: "POST" })
-  .inputValidator(z.object({
+  .validator(z.object({
     videos: z.array(VideoItemSchema),
     enableArrangeMode: z.boolean().optional().default(true),
   }))
