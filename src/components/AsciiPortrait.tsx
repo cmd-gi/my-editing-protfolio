@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import portraitHero from "@/assets/heo-portait.png";
 
 // Reference art character set: heavy on +, -, =, :, *, #
@@ -14,9 +14,7 @@ interface Gaze {
 export function AsciiPortrait({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState<"ascii" | "photo">("ascii");
-  const [isHovered, setIsHovered] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const imageLoadedRef = useRef(false);
 
   // Gaze state
   const gazeRef = useRef<Gaze>({ x: 0, y: 0, blink: 0 });
@@ -46,8 +44,8 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
     img.crossOrigin = "anonymous";
     img.src = portraitHero;
     img.onload = () => {
-      const COLS = 72; // grid resolution matching high-res reference ASCII
-      const ROWS = 92;
+      const COLS = 76; // Crisp high-res ASCII grid
+      const ROWS = 96;
 
       const offCanvas = document.createElement("canvas");
       offCanvas.width = COLS;
@@ -82,7 +80,7 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
         luminance,
         colors,
       };
-      setImageLoaded(true);
+      imageLoadedRef.current = true;
     };
   }, []);
 
@@ -93,14 +91,12 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
     if (!container) return;
 
     const rect = container.getBoundingClientRect();
-    // Cursor position relative to center of eye region
     const eyeCenterX = rect.left + rect.width * 0.5;
     const eyeCenterY = rect.top + rect.height * 0.31;
 
     const dx = (e.clientX - eyeCenterX) / (window.innerWidth * 0.4);
     const dy = (e.clientY - eyeCenterY) / (window.innerHeight * 0.4);
 
-    // Clamp gaze to natural bounds
     targetGazeRef.current = {
       x: Math.max(-1, Math.min(1, dx)),
       y: Math.max(-1, Math.min(1, dy)),
@@ -114,7 +110,6 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
 
   // Main Render & Animation Loop
   useEffect(() => {
-    if (!imageLoaded) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -127,24 +122,22 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
 
     const render = (now: number) => {
       const data = imgDataRef.current;
-      if (!data) return;
+      if (!data) {
+        animFrameRef.current = requestAnimationFrame(render);
+        return;
+      }
 
       // Handle idle loop when mouse hasn't moved for 2 seconds
       const isIdle = Date.now() - lastMouseMoveRef.current > 2000;
       if (isIdle) {
         const timeSec = now * 0.001;
-        // Organic eye action: looking at user, subtle glances
         const glancePhase = Math.sin(timeSec * 0.8);
-        const glanceLook = Math.sin(timeSec * 0.3);
 
         if (glancePhase > 0.85) {
-          // Glance slightly left
           targetGazeRef.current = { x: -0.6, y: -0.1 };
         } else if (glancePhase < -0.85) {
-          // Glance slightly right
           targetGazeRef.current = { x: 0.6, y: -0.1 };
         } else {
-          // Direct eye contact with user
           targetGazeRef.current = {
             x: Math.sin(timeSec * 0.5) * 0.15,
             y: Math.cos(timeSec * 0.4) * 0.1,
@@ -163,18 +156,17 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
         blinkStartTime = now;
       }
       if (isBlinking) {
-        const blinkProgress = (now - blinkStartTime) / 160; // 160ms blink
+        const blinkProgress = (now - blinkStartTime) / 160;
         if (blinkProgress >= 1) {
           isBlinking = false;
           currentGaze.blink = 0;
-          nextBlinkTime = now + 2800 + Math.random() * 3200; // Next blink in 2.8 - 6s
+          nextBlinkTime = now + 2800 + Math.random() * 3200;
         } else {
-          // Smooth blink curve
           currentGaze.blink = Math.sin(blinkProgress * Math.PI);
         }
       }
 
-      // Resize canvas to match display size (high DPI)
+      // High DPI canvas scaling
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const displayWidth = canvas.clientWidth;
       const displayHeight = canvas.clientHeight;
@@ -198,11 +190,11 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
         20,
         displayWidth * 0.52,
         displayHeight * 0.38,
-        displayWidth * 0.5
+        displayWidth * 0.52
       );
-      auraGradient.addColorStop(0, "rgba(206, 255, 0, 0.28)");
-      auraGradient.addColorStop(0.35, "rgba(206, 255, 0, 0.12)");
-      auraGradient.addColorStop(0.65, "rgba(0, 57, 255, 0.08)");
+      auraGradient.addColorStop(0, "rgba(206, 255, 0, 0.32)");
+      auraGradient.addColorStop(0.38, "rgba(206, 255, 0, 0.14)");
+      auraGradient.addColorStop(0.7, "rgba(0, 57, 255, 0.08)");
       auraGradient.addColorStop(1, "rgba(18, 15, 16, 0)");
 
       ctx.fillStyle = auraGradient;
@@ -216,8 +208,6 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      const time = now * 0.001;
-
       // Draw ASCII grid
       for (let r = 0; r < data.height; r++) {
         const ny = r / data.height;
@@ -227,7 +217,7 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
           const idx = r * data.width + c;
           let lum = data.luminance[idx];
 
-          if (lum < 10) continue; // Skip near black
+          if (lum < 10) continue;
 
           // Check if inside Left Eye
           const dLeftX = (nx - eyeCoords.current.left.x) / eyeCoords.current.left.radiusX;
@@ -242,14 +232,12 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
           let isEyeRegion = false;
           let isPupil = false;
 
-          // Process Left Eye
+          // Left Eye
           if (distLeft < 1.1) {
             isEyeRegion = true;
-            // Eyelid blink clipping
             if (Math.abs(dLeftY) > 1 - currentGaze.blink * 1.1) {
-              lum = 40; // closed eyelid shadow
+              lum = 40;
             } else {
-              // Pupil offset with gaze
               const pupilDx = dLeftX - currentGaze.x * 0.45;
               const pupilDy = dLeftY - currentGaze.y * 0.4;
               if (pupilDx * pupilDx + pupilDy * pupilDy < 0.28) {
@@ -258,7 +246,7 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
             }
           }
 
-          // Process Right Eye
+          // Right Eye
           if (distRight < 1.1) {
             isEyeRegion = true;
             if (Math.abs(dRightY) > 1 - currentGaze.blink * 1.1) {
@@ -272,25 +260,22 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
             }
           }
 
-          // Character selection
+          // Character & Color Selection
           let ch = " ";
           let color = "#FFF7EC";
 
           if (isPupil) {
-            // Intense glowing pupil looking straight at user
+            // Intense glowing pupil tracking viewer
             ch = "+";
             color = "#CEFF00";
           } else if (isEyeRegion && lum > 40) {
-            // Sclera / eye whites
             ch = ":";
             color = "#FFFFFF";
           } else {
-            // Reference style ASCII rendering
             const normalizedLum = Math.min(1, Math.max(0, lum / 255));
             const charIdx = Math.floor(normalizedLum * (DENSITY_CHARS.length - 1));
             ch = DENSITY_CHARS[charIdx];
 
-            // Use iconic special chars (+, -, =) on strong edges and highlights
             if (normalizedLum > 0.65) {
               ch = SPECIAL_CHARS[(c + r) % SPECIAL_CHARS.length];
               color = normalizedLum > 0.85 ? "#CEFF00" : "#FFF7EC";
@@ -311,50 +296,7 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
         }
       }
 
-      // Technical Overlays matching the reference poster
-      // 1. Crosshair at eye focus
-      const eyeLookPxX =
-        displayWidth * (0.5 + currentGaze.x * 0.06);
-      const eyeLookPxY =
-        displayHeight * (0.31 + currentGaze.y * 0.05);
-
-      ctx.strokeStyle = "rgba(206, 255, 0, 0.35)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(eyeLookPxX - 10, eyeLookPxY);
-      ctx.lineTo(eyeLookPxX + 10, eyeLookPxY);
-      ctx.moveTo(eyeLookPxX, eyeLookPxY - 10);
-      ctx.lineTo(eyeLookPxX, eyeLookPxY + 10);
-      ctx.stroke();
-
-      // 2. Technical radar arcs & coordinates
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-      ctx.beginPath();
-      ctx.arc(displayWidth * 0.52, displayHeight * 0.34, 110, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(displayWidth * 0.52, displayHeight * 0.34, 180, 0, Math.PI * 0.7);
-      ctx.stroke();
-
-      // Coordinate nodes like in reference poster (+ 1001 - 647)
-      ctx.font = `600 9px "IBM Plex Mono", monospace`;
-      ctx.fillStyle = "rgba(206, 255, 0, 0.75)";
-      ctx.fillText(
-        `+ 1001 - 647`,
-        displayWidth * 0.82,
-        displayHeight * 0.38
-      );
-
-      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-      ctx.fillText(
-        `12.9716° N / 77.5946° E`,
-        displayWidth * 0.28,
-        displayHeight * 0.18
-      );
-
       ctx.restore();
-
       animFrameRef.current = requestAnimationFrame(render);
     };
 
@@ -362,74 +304,14 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [imageLoaded]);
+  }, []);
 
   return (
     <div
       ref={containerRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={`relative w-full max-w-[460px] aspect-[4/5] rounded-[28px] border-3 border-[#151010] overflow-hidden bg-[#120F10] shadow-[8px_8px_0px_#151010] select-none ${className}`}
     >
-      {/* ASCII Canvas */}
-      <canvas
-        ref={canvasRef}
-        className={`w-full h-full object-cover transition-opacity duration-500 ${
-          mode === "ascii" ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      />
-
-      {/* Original Photo Mode fallback */}
-      <img
-        src={portraitHero}
-        alt="Charan — Video Editor"
-        className={`absolute inset-0 w-full h-full object-cover object-top grayscale contrast-125 transition-opacity duration-500 ${
-          mode === "photo" ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      />
-
-      {/* Top Graphic Header (Technical Labeling like Reference Poster) */}
-      <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 pointer-events-none">
-        <div className="bg-[#120F10]/80 backdrop-blur-md border border-white/20 px-2.5 py-1 rounded-full flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#CEFF00] animate-pulse" />
-          <span className="font-mono text-[9px] uppercase tracking-widest text-[#CEFF00] font-bold">
-            ASCII MATRIX · EYE-ACTIVE
-          </span>
-        </div>
-
-        <span className="font-mono text-[9px] text-white/50 tracking-wider">
-          LIVE · 60FPS
-        </span>
-      </div>
-
-      {/* Eye Action Indicator Pill */}
-      <div className="absolute top-14 left-4 z-20 pointer-events-none">
-        <div className="font-mono text-[9px] text-white/70 bg-[#120F10]/70 backdrop-blur-xs px-2 py-0.5 rounded border border-white/10">
-          {isHovered ? "GAZE: TRACKING CURSOR" : "GAZE: EYE CONTACT LOOP"}
-        </div>
-      </div>
-
-      {/* Bottom Floating Control Badge */}
-      <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border-2 border-[#151010] rounded-[18px] p-3 flex items-center justify-between shadow-[3px_3px_0px_#151010] z-20">
-        <div>
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#0039FF] font-bold block">
-            Lead Editor
-          </span>
-          <span className="text-[13px] font-black text-[#151010]">
-            Charan · Bengaluru
-          </span>
-        </div>
-
-        {/* Mode Toggle Button: ASCII vs PHOTO */}
-        <button
-          type="button"
-          onClick={() => setMode((m) => (m === "ascii" ? "photo" : "ascii"))}
-          title="Toggle between ASCII Glyph Art & Photo"
-          className="px-3 py-1.5 rounded-full border border-[#151010] bg-[#CEFF00] hover:bg-[#d8ff26] font-mono text-[10px] font-extrabold uppercase tracking-wider text-[#151010] transition-transform hover:scale-105 cursor-pointer shadow-xs"
-        >
-          {mode === "ascii" ? "View Photo" : "View ASCII"}
-        </button>
-      </div>
+      <canvas ref={canvasRef} className="w-full h-full object-cover block" />
     </div>
   );
 }
