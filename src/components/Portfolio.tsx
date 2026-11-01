@@ -8,6 +8,7 @@ import { VideosSection } from "./VideosSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DecorationStar } from "./daren-curtis/DecorationStar";
 import { ArrowIcon } from "./daren-curtis/ArrowIcon";
+import { AsciiPortrait } from "./AsciiPortrait";
 
 const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
 const InteractiveRobotSpline = lazy(() =>
@@ -108,33 +109,7 @@ function Hero() {
             style={{ y: imgY }}
             className="col-span-12 lg:col-span-5 relative flex justify-center"
           >
-            <div className="relative w-full max-w-[460px] aspect-[4/5] rounded-[28px] border-3 border-[#151010] overflow-hidden bg-white shadow-[8px_8px_0px_#151010]">
-              <img
-                src={portraitHero}
-                alt="Charan — Video Editor & Colorist"
-                className="w-full h-full object-cover object-top grayscale contrast-125"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#151010]/40 via-transparent to-transparent pointer-events-none" />
-
-              {/* Floating Badge */}
-              <div className="absolute bottom-5 left-5 right-5 bg-white/95 backdrop-blur-sm border-2 border-[#151010] rounded-[16px] p-3.5 flex items-center justify-between shadow-[3px_3px_0px_#151010]">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#0039FF] font-bold block">
-                    Lead Editor
-                  </span>
-                  <span className="text-[14px] font-black text-[#151010]">
-                    Charan · Bengaluru
-                  </span>
-                </div>
-                <a
-                  href="#videos"
-                  className="w-9 h-9 rounded-full bg-[#CEFF00] border border-[#151010] flex items-center justify-center hover:scale-110 transition-transform"
-                  aria-label="View Reel"
-                >
-                  <ArrowIcon className="w-3.5 h-3.5 text-[#151010]" />
-                </a>
-              </div>
-            </div>
+            <AsciiPortrait />
           </motion.div>
         </div>
       </div>
